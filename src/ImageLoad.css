@@ -1,0 +1,61 @@
+
+.imagedrop-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: top;
+    justify-content: center;
+    margin: 0px 0px 0px 10px;
+}
+
+.imagedrop-border {
+    border: solid 1px lightgrey;
+    border-radius: 10px;
+    width: 152px;
+    height: 152px;
+}
+
+.imagedrop-border-small {
+    border: solid 1px lightgrey;
+    border-radius: 10px;
+    width: 152px;
+    height: 57px;
+}
+
+.imagedrop-zone {
+    margin: 10px 0px 0px 10px;
+    border: 3px dashed lightgrey;
+    border-radius: 7px;
+    width: 125px;
+    height: 100px;
+}
+
+.imagedrop-zone-small {
+    margin: 5px 0px 0px 10px;
+    border: 3px dashed lightgrey;
+    border-radius: 7px;
+    width: 125px;
+    height: 10px;
+}
+
+.imagedrop-zone-info {
+    margin: 15px 0px 0px 40px;
+    border: 0px;
+}
+
+.imagedrop-browse {
+}
+
+.imagedrop-file-pick {
+    display: none;
+}
+
+.imagedrop-file-browse {
+    margin: 10px 0px 0px 30px;
+    white-space: nowrap;
+}
+
+.imagedrop-file-browse-small
+{
+    margin: 10px 0px 0px 30px;
+    white-space: nowrap;
+}

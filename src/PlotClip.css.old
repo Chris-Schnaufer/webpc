@@ -1,0 +1,48 @@
+
+.plotclip-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.plotclip-image-wrap {
+    flex: auto;
+    min-width: 502px;
+    min-height: 502px;
+    max-width: 502px;
+    max-height: 502px;
+    border: 1px solid darkgray;
+    border-radius: 3px;
+}
+
+.loupe-widget {
+  position: relative;
+  display: inline-block;
+  will-change: transform;
+  
+  &__loupe {
+    position: absolute;
+    z-index: 100;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background-repeat: no-repeat;
+    border: 2px solid #222;
+    box-shadow: 0 0 10px 1px rgba(0,0,0,.2);
+    background-color: white;
+    display: none;
+  }
+  
+  &:hover {
+    cursor:  url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7), auto;
+    
+    .loupe-widget__loupe {
+      display: block;
+      pointer-events: none;
+    }
+  }
+}

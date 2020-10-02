@@ -1,0 +1,32 @@
+
+.card-frame {
+    border: 1px solid lightgrey;
+    border-radius: 5px;
+    min-width: 70px;
+    min-height: 1em;
+    background-color: #e8e8e8;
+    margin-top: 2px;
+}
+
+.card-frame-selected {
+    border: 2px solid #909090;
+    border-radius: 5px;
+    min-width: 70px;
+    min-height: 1em;
+    background-color: unset;
+    box-shadow: 10px 5px 5px darkgrey;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.card-text {
+    color: #a0a0a0;
+    font-size: smaller;
+    margin: 2px;
+}
+
+.card-text-selected {
+    color: black;
+    font-size: normal;
+    margin: 4px;
+}

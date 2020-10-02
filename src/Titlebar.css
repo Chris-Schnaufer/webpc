@@ -1,0 +1,16 @@
+
+.titlebar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.titlebar > h1 {
+}
+
+.titlebar:after {
+    clear: both;
+    content: "";
+    display: table;
+}

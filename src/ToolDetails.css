@@ -1,0 +1,29 @@
+
+.tooldetails-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    margin-left: 30px;
+    height: 500px;
+}
+
+.tooldetails-options-wrap {
+    flex: 1;
+}
+
+.tooldetails-options {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.tooldetail-card-wrap {
+    flex: 5;
+}
+
+.tooldetail-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    min-wdith: 70px;
+}

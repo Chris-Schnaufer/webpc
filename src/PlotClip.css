@@ -1,0 +1,48 @@
+
+.plotclip-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.plotclip-image-wrap {
+    flex: auto;
+    min-width: 502px;
+    min-height: 502px;
+    max-width: 502px;
+    max-height: 502px;
+    border: 1px solid darkgray;
+    border-radius: 3px;
+}
+
+.plotclip-image-grid {
+    display: grid;
+    height: 500px;
+    width: 500px;
+}
+
+.grid_lines {
+    grid-column: 1;
+    grid-row: 1;
+    z-index: 99999;
+    pointer-events: none;
+}
+
+.plotclip-toolbar-wrap {
+    height: 500px;
+    margin-left: 10px;
+}
+
+.plotclip-bounds-done {
+}
+
+.plotclip-plots-done {    
+}
+
+.tool-options-plot-navigation {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin-top:10px;
+}

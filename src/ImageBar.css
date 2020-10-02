@@ -1,0 +1,70 @@
+
+.imagebar-wrap {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    height: 182px;
+    margin-bottom: 10px;
+}
+
+.imagebar-wrap-small {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    height: 70px;
+    margin-bottom: 10px;
+}
+
+.imagebar-image-wrap {
+    flex: auto;
+    min-width: 152px;
+    min-height: 152px;
+    max-width: 152px;
+    max-height: 152px;
+    margin: 3px 10px 3px 10px;
+    border: 1px solid darkgray;
+    border-radius: 7px;
+    background: content-box linear-gradient(white, lightblue);
+    background-clip: content-box;
+}
+
+.imagebar-image-wrap-small {
+    flex: auto;
+    min-width: 49px;
+    min-height: 49px;
+    max-width: 49px;
+    max-height: 49px;
+    margin: 3px 10px 3px 10px;
+    border: 1px solid darkgray;
+    border-radius: 7px;
+    background: content-box linear-gradient(white, lightblue);
+    background-clip: content-box;
+}
+
+.imagebar-image {
+    min-width: 150px;
+    min-height: 150px;
+    max-width: 150px;
+    max-height: 150px;
+}
+
+.imagebar-image-small {
+    min-width: 47px;
+    min-height: 47px;
+    max-width: 47px;
+    max-height: 47px;
+}
+
+.imagebar-image-label {
+    font-size: smaller;
+    font-weight: normal;
+    text-align: center;
+    color: black;
+}
+
+.imagebar-image-label-small {
+    font-size: x-small;
+    font-weight: normal;
+    text-align: center;
+    color: black;
+}
