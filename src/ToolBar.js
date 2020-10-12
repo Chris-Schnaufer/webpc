@@ -36,10 +36,15 @@ class Toolbar extends Component {
   }
 
   tool_selected(tool_id) {
-
+    for (let idx = 0; idx < this.props.tools.length; idx++) {
+      if ((this.props.tools[idx].id === tool_id) && this.props.tools[idx].hasOwnProperty('tool_click')) {
+        this.props.tools[idx].tool_click(tool_id);
+      }
+    }
   }
 
   handle_overlay(state, tool_info) {
+    let small_size = this.props.hasOwnProperty("tool_size") && this.props.tool_size === "small";
     if (state) {
       return (
         <div id="toolbar-tool-grid" className="toolbar-tool-grid" >
@@ -49,20 +54,26 @@ class Toolbar extends Component {
                  baseProfile="full"
                  width="100%" height="100%"
                  xmlns="http://www.w3.org/2000/svg">
-            <polygon points="0 0 60 0 60 90 0 90" stroke="white" strokeWidth="1" fill="white" fillOpacity="60%" />
+            <polygon points="0 0 60 0 60 95 0 95 0 0" stroke="white" strokeWidth="1" fill="white" fillOpacity="60%" />
           </svg>
           <div id="toolbar-tooldetail-wrap" className="toolbar-tooldetail-wrap" >
-            <img id={"toolbar-tool-"  + tool_info.id.toString()} className="toolbar-tool" src={tool_info.tool_uri} alt={tool_info.name} />
-            <div id={"toolbar-tool-"  + tool_info.id.toString() + "-label"} className="toolbar-tool-label">{tool_info.name}</div>
+            <img id={"toolbar-tool-"  + tool_info.id.toString()} 
+                 className={small_size ? "toolbar-tool-small" : "toolbar-tool"}
+                 src={tool_info.tool_uri} 
+                 alt={tool_info.name} />
+            {!small_size && <div id={"toolbar-tool-"  + tool_info.id.toString() + "-label"} className="toolbar-tool-label">{tool_info.name}</div>}
           </div>
         </div>
         );
     }
     return (
       <React.Fragment>
-        <img id={"toolbar-tool-"  + tool_info.id.toString()} className="toolbar-tool" src={tool_info.tool_uri} alt={tool_info.name} />
-        <div id={"toolbar-tool-"  + tool_info.id.toString() + "-label"} className="toolbar-tool-label">{tool_info.name}</div>
-        </React.Fragment>
+        <img id={"toolbar-tool-"  + tool_info.id.toString()} 
+             className={small_size ? "toolbar-tool-small" : "toolbar-tool"}
+             src={tool_info.tool_uri} 
+             alt={tool_info.name} />
+        {!small_size && <div id={"toolbar-tool-"  + tool_info.id.toString() + "-label"} className="toolbar-tool-label">{tool_info.name}</div>}
+      </React.Fragment>
     );
   }
 
@@ -81,7 +92,10 @@ class Toolbar extends Component {
           }
 
           return (
-              <div key={one_tool.id.toString()} id={"toolbar-tool-wrap" + one_tool.id.toString()} className="toolbar-tool-wrap" onClick={() => this.tool_selected(one_tool.id)}>
+              <div key={one_tool.id.toString()} 
+                   id={"toolbar-tool-wrap-" + one_tool.id.toString()} 
+                   className={(this.props.tool_size && this.props.tool_size === "small") ?  "toolbar-tool-wrap-small" : "toolbar-tool-wrap"} 
+                   onClick={() => this.tool_selected(one_tool.id)}>
                 {this.handle_overlay(state, one_tool)}
               </div>
           );

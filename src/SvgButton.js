@@ -31,7 +31,7 @@ class SvgButton extends Component {
              width="80" height="80"
              xmlns="http://www.w3.org/2000/svg">
           {this.state.left_facing && !this.is_enabled() && <polygon points="1 20 20 0 20 10 50 10 50 30 20 30 20 40 0 20" stroke="grey" fill="lightgrey" strokeWidth="1" />}
-          {this.state.left_facing && this.is_enabled() && <polygon points="1 20 20 0 20 10 50 10 50 20 20 20 20 30 0 20" stroke="green" fill="lightgreen" strokeWidth="2" />}
+          {this.state.left_facing && this.is_enabled() && <polygon points="1 20 20 0 20 10 50 10 50 30 20 30 20 40 0 20" stroke="green" fill="lightgreen" strokeWidth="2" />}
           {!this.state.left_facing && !this.is_enabled() && <polygon points="0 10 30 10 30 0 50 20 30 40 30 30 0 30 0 10" stroke="grey" fill="lightgrey" strokeWidth="1" />}
           {!this.state.left_facing && this.is_enabled() && <polygon points="1 10 30 10 30 0 50 20 30 40 30 30 1 30 1 10" stroke="green" fill="lightgreen" strokeWidth="2" />}
         </svg>

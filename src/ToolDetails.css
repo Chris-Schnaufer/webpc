@@ -25,5 +25,5 @@
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    min-wdith: 70px;
+    min-width: 70px;
 }

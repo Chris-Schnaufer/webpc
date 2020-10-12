@@ -22,7 +22,7 @@
     width: 500px;
 }
 
-.grid_lines {
+.field_bounds {
     grid-column: 1;
     grid-row: 1;
     z-index: 99999;
@@ -40,9 +40,29 @@
 .plotclip-plots-done {    
 }
 
+.plotclip-tool-actions {
+    height: 500px;
+}
+
+.plotclip-tool-details-wrap {
+}
+
 .tool-options-plot-navigation {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
     margin-top:10px;
+}
+
+.field_image_wrapper {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.field_image {
+    width:100%;
+    height:100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-clip: content-box;
 }

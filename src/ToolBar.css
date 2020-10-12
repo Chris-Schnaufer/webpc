@@ -14,6 +14,13 @@
     overflow: hidden;
 }
 
+.toolbar-tool-wrap-small {
+    flex: auto;
+    min-width: 30px;
+    min-height: 30px;
+    overflow: hidden;
+}
+
 .toolbar-tool {
     min-width: 54px;
     min-height: 54px;
@@ -22,6 +29,17 @@
     margin: 1px 5px 1px 1px;
     border: 1px solid darkgray;
     border-radius: 5px;
+    background-clip: content-box;
+}
+
+.toolbar-tool-small {
+    min-width: 28px;
+    min-height: 28px;
+    max-width: 28px;
+    max-height: 28px;
+    margin: 1px 5px 1px 1px;
+    border: 1px solid darkgray;
+    border-radius: 3px;
     background-clip: content-box;
 }
 

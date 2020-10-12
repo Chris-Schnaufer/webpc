@@ -47,6 +47,26 @@ def _get_image_mime_type(image_type: str) -> Optional[str]:
     return mimetype
 
 
+def _get_image_dims_scale(source_image: str, max_dimension_pixel: int) -> tuple:
+    """Returns the image scale factor between the image size and the specified maximum dimension
+    Arguments:
+        source_image: the source image to scale
+        max_dimension_pixel: the number of pixels in the largest dimension
+    Returns:
+        A tuple containing the image's width, height, and scale factor
+    """
+    source = Image.open(source_image)
+    if source.width <= 0 or source.height <= 0:
+        raise RuntimeError('Invalid size for image: "%s"' % source_image)
+
+    # Scale along the largest image dimension
+    if source.width > source.height:
+        return source.width, source.height, float(max_dimension_pixel) / float(source.width)
+    
+    return source.width, source.height, float(max_dimension_pixel) / float(source.height)
+
+
+
 def _generate_sized_image(source_image: str, save_path: str, max_dimension_pixel: int) -> None:
     """Generates an image from the source image keeping the aspect ratio
     Arguments:
@@ -95,12 +115,18 @@ def files() -> tuple:
             one_file.save(save_path)
 
     for one_file in os.listdir(FILE_SAVE_PATH):
-        if not os.path.isdir(os.path.join(FILE_SAVE_PATH, one_file)) and not one_file[0] == '.':
+        file_path = os.path.join(FILE_SAVE_PATH, one_file)
+        if not os.path.isdir(file_path) and not one_file[0] == '.':
             file_id = re.sub("[^0-9a-zA-Z]+", "", str(os.path.basename(one_file)))
+            img_width, img_height, img_scale = _get_image_dims_scale(file_path, MAX_DISPLAY_IMAGE_PIXEL);
             return_names.append({'name': one_file,
                                  'uri': request.url_root + 'img/' + one_file,
                                  'thumbnail_uri': request.url_root + 'thumb/' + one_file,
-                                 'id': file_id})
+                                 'id': file_id,
+                                 'width': img_width,
+                                 'height': img_height,
+                                 'scale': img_scale,
+                                 })
 
     return json.dumps(return_names)
 

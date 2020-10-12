@@ -59,8 +59,8 @@ class ImageBar extends Component {
     this.setState({max_display: max_images});
   }
 
-  image_selected(image_uri) {
-    this.props.selected_func(image_uri);
+  image_selected(image_uri, image_details) {
+    this.props.selected_func(image_uri, image_details);
   }
 
   thumbnails(images) {
@@ -69,7 +69,7 @@ class ImageBar extends Component {
     const image_label_class = this.props.full_bar ? "imagebar-image-label" : "imagebar-image-label-small";
     return (
       images.map((image) => 
-          <div key={image.id.toString()} id={"imagebar-image-wrap" + image.id.toString()} className={image_wrap_class} onClick={() => this.image_selected(image.uri)}>
+          <div key={image.id.toString()} id={"imagebar-image-wrap" + image.id.toString()} className={image_wrap_class} onClick={() => this.image_selected(image.uri, image)}>
             <img id={"imagebar-image-"  + image.id.toString()} className={image_class} src={image.thumbnail_uri} alt={image.name} />
             <label id={"imagebar-image-"  + image.id.toString() + "-label"} className={image_label_class} >
               {image.name}

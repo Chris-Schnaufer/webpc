@@ -16,6 +16,7 @@ class App extends Component {
       image_bar_full: true,
       reload_images: true,
       selected_image: null,
+      image_details: null,
     };
   }
 
@@ -27,8 +28,8 @@ class App extends Component {
     this.setState({reload_images: false});
   }
 
-  image_selected(image_uri) {
-    this.setState({selected_image: image_uri, image_bar_full: false});
+  image_selected(image_uri, image_details) {
+    this.setState({selected_image: image_uri, image_details: image_details, image_bar_full: false});
   }
 
   reload_images() {
@@ -48,7 +49,7 @@ class App extends Component {
                     full_bar={image_bar_full}
                     expand_func={this.expand_image_bar}
           />
-        {this.state.selected_image != null ? <PlotClip image_uri={this.state.selected_image} /> : null}
+        {this.state.selected_image != null ? <PlotClip image_uri={this.state.selected_image} image_details={this.state.image_details} /> : null}
       </div>
     );
   }
