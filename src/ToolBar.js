@@ -71,7 +71,8 @@ class Toolbar extends Component {
         <img id={"toolbar-tool-"  + tool_info.id.toString()} 
              className={small_size ? "toolbar-tool-small" : "toolbar-tool"}
              src={tool_info.tool_uri} 
-             alt={tool_info.name} />
+             alt={tool_info.name} 
+             title={small_size && tool_info.hasOwnProperty('description') ? tool_info.description : null} />
         {!small_size && <div id={"toolbar-tool-"  + tool_info.id.toString() + "-label"} className="toolbar-tool-label">{tool_info.name}</div>}
       </React.Fragment>
     );

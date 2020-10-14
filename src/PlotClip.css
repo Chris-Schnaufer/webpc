@@ -66,3 +66,11 @@
     background-repeat: no-repeat;
     background-clip: content-box;
 }
+
+#field_corner {
+    pointer-events: fill;
+}
+
+#field_corner:hover {
+    cursor: move;
+}
