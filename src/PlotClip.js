@@ -37,8 +37,8 @@ class PlotClip extends Component {
                   was_drawing: false,
                   have_bounds: false,
                   current_tool: 0,
-                  plot_rows: 0,
-                  plot_cols: 0,
+                  plot_rows: 1,
+                  plot_cols: 1,
                  };
   }
 
@@ -193,7 +193,7 @@ class PlotClip extends Component {
     this.plots_display_info.offset_y = 0;
     this.plots_display_info.field_disp_scale = 1.0;
     this.plots_display_info.img_disp_scale = 1.0;
-    this.setState({current_tool: 0, drawing: false})
+    this.setState({current_tool: 0, drawing: false, plot_cols: 1, plot_rows: 1})
   }
 
   boundsDone(ev) {
@@ -253,9 +253,9 @@ class PlotClip extends Component {
       <div style={{disply:"flex", displayDirection:"column", justifyContent: "space-around"}} >
         <div style={{display:"grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "10px"}} >
             <label htmlFor="plot_cols" style={{gridColumn: 1}}>Number of plot columns:</label>
-            <input id="plot_cols" type="number" min="1" max="1000" placeholder="Column count" size="10" style={{gridColumn: 2, maxWidth: "100px"}} onChange={this.plotsCols}></input>
+            <input id="plot_cols" type="number" min="1" max="1000" placeholder={this.state.plot_cols.toString()} size="10" style={{gridColumn: 2, maxWidth: "100px"}} onChange={this.plotsCols}></input>
             <label htmlFor="plot_rows" style={{gridColumn: 1}}>Number of plot rows:</label>
-            <input id="plot_rows" type="number" min="1" max="1000" placeholder="Row count" size="10" style={{gridColumn: 2, maxWidth: "100px"}} onChange={this.plotsRows}></input>
+            <input id="plot_rows" type="number" min="1" max="1000" placeholder={this.state.plot_rows.toString()} size="10" style={{gridColumn: 2, maxWidth: "100px"}} onChange={this.plotsRows}></input>
         </div>
         <div id="tool-options-plot-navigation" className="tool-options-plot-navigation">
           <SvgButton enabled={true} left={true} onClicked={this.getBounds} />
@@ -493,7 +493,7 @@ class PlotClip extends Component {
           }
           {
             plot_lines.map((plot, idx) => {
-              return (<polygon points={plot} stroke="blue" fill="lightgrrey" strokeWidth= "2" fillOpacity=".7" />);
+              return (<polygon points={plot} stroke="blue" fill="lightgrey" strokeWidth= "2" fillOpacity=".7" />);
             })
           }
         </svg>
