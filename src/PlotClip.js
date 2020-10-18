@@ -27,7 +27,7 @@ class PlotClip extends Component {
     this.plotsDone = this.plotsDone.bind(this);
     this.plotsRows = this.plotsRows.bind(this);
     this.toolOptionsField = this.toolOptionsField.bind(this);
-    this.toolOptionsPlot = this.toolOptionsPlot.bind(this);
+    this.toolOptionsPlotCount = this.toolOptionsPlotCount.bind(this);
 
     this.state = {points_x: [],
                   points_y: [],
@@ -59,17 +59,17 @@ class PlotClip extends Component {
   },
   {
     id: 'plot_rows_columns', 
-    name: 'Plot Definition', 
+    name: 'Plot Counts', 
     tool_uri: process.env.PUBLIC_URL + '/PlotCounts.png', 
     state: 1, 
     tool_actions: this.plots_actions,
-    tool_options: ()=>this.toolOptionsPlot()
+    tool_options: ()=>this.toolOptionsPlotCount()
   },
   ];
 
   cards = [
     'Click on the field corners to outline the boundaries of all the plots',
-    'Enter the number of plot rows and columns contained within the boundary. Drag points to move them'
+    'Enter the number of plot rows and columns contained within the boundary. Drag corners to move them'
   ];
 
   plots_display_info = {
@@ -78,7 +78,7 @@ class PlotClip extends Component {
     field_disp_scale: 1.0,
     img_display_scale: 1.0,
     img_width: 100,
-    img_height: 100
+    img_height: 100,
   };
 
   corner_move_idx = -1;
@@ -92,6 +92,10 @@ class PlotClip extends Component {
   }
 
   clicked(ev) {
+    if (this.state.points_x.length >= 4) {
+      return;
+    }
+
     let new_points_x = this.state.points_x;
     let new_points_y = this.state.points_y;
 
@@ -225,7 +229,7 @@ class PlotClip extends Component {
 
   plotsRows(ev) {
     const num_rows = ev.target.value;
-    this.setState({plot_cols: num_rows});
+    this.setState({plot_rows: num_rows});
   }
 
   plotsDone(ev) {
@@ -244,7 +248,7 @@ class PlotClip extends Component {
     );
   }
 
-  toolOptionsPlot() {
+  toolOptionsPlotCount() {
     return (
       <div style={{disply:"flex", displayDirection:"column", justifyContent: "space-around"}} >
         <div style={{display:"grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "10px"}} >
@@ -282,7 +286,63 @@ class PlotClip extends Component {
   }
 
   get_plotlines() {
+    const rows = Math.max(1, this.state.plot_rows);
+    const cols = Math.max(1, this.state.plot_cols);
+    const points_x = this.state.points_x;
+    const points_y = this.state.points_y;
+    // Since we start form the "upper left" (aka: the first point) we have offsets relative to that point
+    const top_seg_dist = {x: parseFloat(points_x[1] - points_x[0]) / cols, y: parseFloat(points_y[1] - points_y[0]) / cols};
+    const right_seg_dist = {x: parseFloat(points_x[2] - points_x[1]) / rows, y: parseFloat(points_y[2] - points_y[1]) / rows};
+    const bottom_seg_dist = {x: parseFloat(points_x[2] - points_x[3]) / cols, y: parseFloat(points_y[2] - points_y[3]) / cols};
+    const left_seg_dist = {x: parseFloat(points_x[3] - points_x[0]) / rows, y: parseFloat(points_y[3] - points_y[0]) / rows};
     let plotlines = [];
+
+    for (let idx_row =  0; idx_row < rows; idx_row++) {
+      // Calculate the top side for the row of plots
+      const top_lx = points_x[0] + (idx_row * left_seg_dist.x);
+      const top_ly = points_y[0] + (idx_row * left_seg_dist.y);
+      const top_rx = points_x[1] + (idx_row * right_seg_dist.x);
+      const top_ry = points_y[1] + (idx_row * right_seg_dist.y);
+      const top_slope = (top_ry - top_ly) / (top_rx - top_lx);
+
+      // Calculate the bottom side for the row of plots
+      const bot_lx = points_x[0] + ((idx_row + 1) * left_seg_dist.x);
+      const bot_ly = points_y[0] + ((idx_row + 1) * left_seg_dist.y);
+      const bot_rx = points_x[1] + ((idx_row + 1) * right_seg_dist.x);
+      const bot_ry = points_y[1] + ((idx_row + 1) * right_seg_dist.y);
+      const bot_slope = (bot_ry - bot_ly) / (bot_rx - bot_lx);
+
+      for (let idx_col = 0; idx_col < cols; idx_col++) {
+        const top_col_dist = {x: (top_rx - top_lx) / cols, y: (top_ry - top_ly) / cols};
+        const bottom_col_dist = {x: (bot_rx - bot_lx) / cols, y: (bot_ry - bot_ly) / cols};
+        // Calculating the left side of the plot for left points
+        const left_ux = top_lx + (idx_col * top_col_dist.x);
+        const left_bx = bot_lx + (idx_col * bottom_col_dist.x);
+
+        // Calculating the right side of the plot for right points
+        const right_ux = top_lx + ((idx_col + 1) * top_col_dist.x);
+        const right_bx = bot_lx + ((idx_col + 1) * bottom_col_dist.x);
+
+        const ul_pt = {x: left_ux,  y: (left_ux - top_lx) * top_slope + top_ly};
+        const ur_pt = {x: right_ux, y: (right_ux - top_lx) * top_slope + top_ly};
+        const lr_pt = {x: right_bx, y: (right_bx - bot_lx) * bot_slope + bot_ly};
+        const ll_pt = {x: left_bx,  y: (left_bx - bot_lx) * bot_slope + bot_ly};
+
+        let plot =         ((ul_pt.x * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_x)
+                   + ' ' + ((ul_pt.y * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_y)
+                   + ' ' + ((ur_pt.x * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_x)
+                   + ' ' + ((ur_pt.y * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_y)
+                   + ' ' + ((lr_pt.x * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_x)
+                   + ' ' + ((lr_pt.y * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_y)
+                   + ' ' + ((ll_pt.x * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_x)
+                   + ' ' + ((ll_pt.y * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_y)
+                   + ' ' + ((ul_pt.x * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_x)
+                   + ' ' + ((ul_pt.y * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_y);
+        console.log("Plot",plot);
+        plotlines.push(plot);
+      }
+    }
+
     return plotlines;
   }
 
@@ -414,7 +474,7 @@ class PlotClip extends Component {
              baseProfile="full"
              width="500" height="500"
              xmlns="http://www.w3.org/2000/svg">
-          <polygon points={polyline} stroke="white" strokeWidth="3" fill="lightgrey" fillOpacity="70%" />
+          <polygon points={polyline} stroke="white" fill="none" strokeWidth="3" />
           {
             this.state.points_x.map((coord_x, idx) => {
                 return (<circle
@@ -429,8 +489,13 @@ class PlotClip extends Component {
                         onMouseDown={(ev) => this.fieldCornerMoveStart(ev, idx)}
                       />
                 )
-            }
-          )}
+            })
+          }
+          {
+            plot_lines.map((plot, idx) => {
+              return (<polygon points={plot} stroke="blue" fill="lightgrrey" strokeWidth= "2" fillOpacity=".7" />);
+            })
+          }
         </svg>
         <div id="field_image_wrapper" className="field_image_wrapper">
           <div id="field_image"
