@@ -1,0 +1,22 @@
+
+.plot-adjust-grid {
+    display: grid;
+    width: 220px;
+    height: 320px;
+}
+
+.plot-adjust-box {
+    grid-column: 1;
+    grid-row: 1;
+    width: 180px;
+    height: 280px;
+    margin-top: 20px;
+    margin-left: 20px;
+    outline: 3px solid lightgrey;
+}
+
+.adjustment_bounds {
+    grid-column: 1;
+    grid-row: 1;
+    z-index: 99999;
+}

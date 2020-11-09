@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {GlassMagnifier, MOUSE_ACTIVATION, TOUCH_ACTIVATION} from "react-image-magnifiers";
+import PlotAdjustment from './PlotAdjustment'
 import SvgButton from './SvgButton'
 import Toolbar from './ToolBar'
 import ToolDetails from './ToolDetails'
@@ -18,13 +19,15 @@ class PlotClip extends Component {
     this.fieldCornerMove = this.fieldCornerMove.bind(this);
     this.fieldCornerUp = this.fieldCornerUp.bind(this);
     this.getBounds = this.getBounds.bind(this);
+    this.getPlotCounts = this.getPlotCounts.bind(this);
     this.imageLoaded = this.imageLoaded.bind(this);
     this.keyPress = this.keyPress.bind(this);
     this.mouseEnter = this.mouseEnter.bind(this);
     this.mouseLeave = this.mouseLeave.bind(this);
     this.mouseMove = this.mouseMove.bind(this);
     this.plotsCols = this.plotsCols.bind(this);
-    this.plotsDone = this.plotsDone.bind(this);
+    this.plotCountsDone = this.plotCountsDone.bind(this);
+    this.plotDefsDone = this.plotDefsDone.bind(this);
     this.plotsRows = this.plotsRows.bind(this);
     this.toolOptionsField = this.toolOptionsField.bind(this);
     this.toolOptionsPlotCount = this.toolOptionsPlotCount.bind(this);
@@ -44,10 +47,13 @@ class PlotClip extends Component {
 
   bounds_actions = [
   {id: 'delete_point', name: 'Delete last point', description: "Delete Last Point", tool_uri: process.env.PUBLIC_URL + '/Delete.png', state: 1, tool_click: ()=>this.actionFieldDelete()},
-  {id: 'clear_points', name: 'Clear all points', description: "Clear Points", tool_uri: process.env.PUBLIC_URL + '/Clear.png', state: 0, tool_click: ()=>this.actionFieldClear()},
+  {id: 'clear_points', name: 'Clear all points', description: "Clear Points", tool_uri: process.env.PUBLIC_URL + '/Clear.png', state: 1, tool_click: ()=>this.actionFieldClear()},
+//  {id: 'toggle_magnifier', name: 'Shows and hides magnifier', description: "Toggle Magnifier", tool_uri: process.env.PUBLIC_URL + '/Magnifier.png', state: 0, tool_click: ()=>this.actionToggleMagnifier()},
   ];
 
   plots_actions = [];
+
+  adjustment_actions = [];
 
   tools = [
   { id: 'draw_plot_boundaries', 
@@ -65,11 +71,20 @@ class PlotClip extends Component {
     tool_actions: this.plots_actions,
     tool_options: ()=>this.toolOptionsPlotCount()
   },
+  {
+    id: 'plot_adjustment', 
+    name: 'Plot Adjustment', 
+    tool_uri: process.env.PUBLIC_URL + '/PlotAdjustment.png', 
+    state: 1, 
+    tool_actions: this.adjustment_actions,
+    tool_options: ()=>this.toolOptionsPlotAdjustment()
+  },
   ];
 
   cards = [
     'Click on the field corners to outline the boundaries of all the plots',
-    'Enter the number of plot rows and columns contained within the boundary. Drag corners to move them'
+    'Enter the number of plot rows and columns contained within the boundary. Drag field corners to move them',
+    'Drag the adjustment bars to offset plots from boundaries'
   ];
 
   plots_display_info = {
@@ -117,24 +132,30 @@ class PlotClip extends Component {
 
     // Good point, add it in
     this.bounds_actions[0].state = 0;
+    this.bounds_actions[1].state = 0;
     new_points_x.push(img_click_x);
     new_points_y.push(img_click_y);
 
-    this.setState({points_x: new_points_x, points_y: new_points_y, drawing: true});
+    let new_state = {points_x: new_points_x, points_y: new_points_y, drawing: true};
 
     if (new_points_x.length > 3) {
-      this.setState({have_bounds: true});
+      new_state['have_bounds'] = true;
+      new_state['drawing'] = false;
     }
+
+    this.setState(new_state);
   }
 
   keyPress(ev) {
-    if (ev.key === 'Escape') {
-      this.setState({drawing: false});
-    } else if ((ev.key === 'Backspace') || (ev.key === 'x') || (ev.key === 'X')) {
-      this.setState({last_x: null, last_y: null, drawing: false});
-      this.actionFieldDelete();
-    } else if ((ev.key === 'c') || (ev.key === 'C')) {
-      this.actionFieldClear();
+    if (this.state.current_tool === 0) {
+      if (ev.key === 'Escape') {
+        this.setState({drawing: false});
+      } else if ((ev.key === 'Backspace') || (ev.key === 'x') || (ev.key === 'X')) {
+        this.setState({last_x: null, last_y: null, drawing: false});
+        this.actionFieldDelete();
+      } else if ((ev.key === 'c') || (ev.key === 'C')) {
+        this.actionFieldClear();
+      }
     }
   }
 
@@ -202,6 +223,23 @@ class PlotClip extends Component {
     this.setState({current_tool: 1, drawing: false, was_drawing: false});
   }
 
+  getPlotCounts(ev) {
+    this.tools[1].state = 0;
+    this.tools[2].state = 1;
+    this.setState({current_tool: 1});
+  }
+
+  plotCountsDone(ev) {
+    this.tools[1].state = -1;
+    this.tools[2].state = 0;
+    this.setState({current_tool: 2});
+  }
+
+  plotDefsDone(ev) {
+    this.tools[2].state = -1;
+    this.setState({current_tool: 2});
+  }
+
   actionFieldDelete(ev) {
     let cur_x = this.state.points_x;
     let cur_y = this.state.points_y;
@@ -211,6 +249,7 @@ class PlotClip extends Component {
 
     if (cur_x.length <= 0) {
       this.bounds_actions[0].state = 1;
+      this.bounds_actions[1].state = 1;
     }
 
       this.setState({points_x: cur_x, points_y: cur_y});
@@ -219,6 +258,7 @@ class PlotClip extends Component {
 
   actionFieldClear(ev) {
     this.bounds_actions[0].state = 1;
+    this.bounds_actions[1].state = 1;
     this.setState({points_x: [], points_y: []});
   }
 
@@ -230,11 +270,6 @@ class PlotClip extends Component {
   plotsRows(ev) {
     const num_rows = ev.target.value;
     this.setState({plot_rows: num_rows});
-  }
-
-  plotsDone(ev) {
-    this.tools[1].state = -1;
-    this.setState({current_tool: 1});
   }
 
   toolOptionsField() {
@@ -259,10 +294,26 @@ class PlotClip extends Component {
         </div>
         <div id="tool-options-plot-navigation" className="tool-options-plot-navigation">
           <SvgButton enabled={true} left={true} onClicked={this.getBounds} />
-          <SvgButton enabled={false} left={false} onClicked={this.plotsDone} />
+          <SvgButton enabled={true} left={false} onClicked={this.plotCountsDone} />
         </div>
       </div>
     );
+  }
+
+  toolOptionsPlotAdjustment() {
+    return (
+      <React.Fragment>
+        <div style={{disply:"flex", displayDirection:"column", justifyContent: "space-around"}} >
+          <div style={{width:"50%"}} >&nbsp;</div>
+          <PlotAdjustment />
+          <div style={{width:"50%"}} >&nbsp;</div>
+        </div>
+        <div id="tool-options-plot-navigation" className="tool-options-plot-navigation">
+          <SvgButton enabled={true} left={true} onClicked={this.getPlotCounts} />
+          <SvgButton enabled={false} left={false} onClicked={this.plotDefsDone} />
+        </div>
+      </React.Fragment>
+      );
   }
 
   get_polyline() {
@@ -290,10 +341,9 @@ class PlotClip extends Component {
     const cols = Math.max(1, this.state.plot_cols);
     const points_x = this.state.points_x;
     const points_y = this.state.points_y;
+
     // Since we start form the "upper left" (aka: the first point) we have offsets relative to that point
-    const top_seg_dist = {x: parseFloat(points_x[1] - points_x[0]) / cols, y: parseFloat(points_y[1] - points_y[0]) / cols};
     const right_seg_dist = {x: parseFloat(points_x[2] - points_x[1]) / rows, y: parseFloat(points_y[2] - points_y[1]) / rows};
-    const bottom_seg_dist = {x: parseFloat(points_x[2] - points_x[3]) / cols, y: parseFloat(points_y[2] - points_y[3]) / cols};
     const left_seg_dist = {x: parseFloat(points_x[3] - points_x[0]) / rows, y: parseFloat(points_y[3] - points_y[0]) / rows};
     let plotlines = [];
 
@@ -338,7 +388,6 @@ class PlotClip extends Component {
                    + ' ' + ((ll_pt.y * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_y)
                    + ' ' + ((ul_pt.x * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_x)
                    + ' ' + ((ul_pt.y * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_y);
-        console.log("Plot",plot);
         plotlines.push(plot);
       }
     }
@@ -476,6 +525,11 @@ class PlotClip extends Component {
              xmlns="http://www.w3.org/2000/svg">
           <polygon points={polyline} stroke="white" fill="none" strokeWidth="3" />
           {
+            plot_lines.map((plot, idx) => {
+              return (<polygon points={plot} key={idx} stroke="blue" fill="lightgrey" strokeWidth= "2" fillOpacity=".7" />);
+            })
+          }
+          {
             this.state.points_x.map((coord_x, idx) => {
                 return (<circle
                         id="field_corner"
@@ -483,17 +537,12 @@ class PlotClip extends Component {
                         cx={(coord_x * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_x}
                         cy={(this.state.points_y[idx] * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_y}
                         r={3}
-                        stroke="white"
+                        stroke="blue"
                         strokeWidth="2"
                         fill="darkgrey"
                         onMouseDown={(ev) => this.fieldCornerMoveStart(ev, idx)}
                       />
                 )
-            })
-          }
-          {
-            plot_lines.map((plot, idx) => {
-              return (<polygon points={plot} stroke="blue" fill="lightgrey" strokeWidth= "2" fillOpacity=".7" />);
             })
           }
         </svg>
@@ -530,7 +579,7 @@ class PlotClip extends Component {
              onMouseUp={up_func} >
           <div id="plotclip-image-grid" className="plotclip-image-grid" >
             {(this.state.current_tool === 0) && this.render_field()}
-            {(this.state.current_tool === 1) && this.render_plots()}
+            {(this.state.current_tool === 1 || this.state.current_tool === 2) && this.render_plots()}
         </div>
         </div>
         <div id="plotclip-tool-actions" className="plotclip-tool-actions" >
