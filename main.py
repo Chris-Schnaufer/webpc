@@ -187,3 +187,24 @@ def thumbnail(name: str = None):
         _generate_sized_image(image_path, thumbnail_path, MAX_THUMBNAIL_PIXEL)
 
     return send_file(thumbnail_path)
+
+@app.route('/export/<string:name>', methods=['POST'])
+@cross_origin()
+def export_plots(name: str = None):
+    """Returns the GeoJSON of the plot boundaries"""
+    if name is None:
+        return 'Resource not found', 400
+
+    image_path = os.path.join(FILE_SAVE_PATH, secure_filename(str(name)))
+    if not os.path.exists(image_path):
+        print('Invalid export plots image requested: "%s"' % name, flush=True)
+        return 'Resource not found', 400
+
+    img_type = os.path.splitext(image_path)[1].lstrip('.')
+    mimetype = _get_image_mime_type(img_type)
+    if not mimetype:
+        print('Invalid export plots image type: "%s"' % name, flush=True)
+        return 'Resource not found', 400
+
+    return json.dumps([{'something': 'goes here'}])
+

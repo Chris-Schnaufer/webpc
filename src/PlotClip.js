@@ -1,18 +1,21 @@
 import React, { Component } from 'react';
 import {GlassMagnifier, MOUSE_ACTIVATION, TOUCH_ACTIVATION} from "react-image-magnifiers";
 import PlotAdjustment from './PlotAdjustment'
-import SvgButton from './SvgButton'
+//import SvgButton from './SvgButton'
 import Toolbar from './ToolBar'
 import ToolDetails from './ToolDetails'
+import Magnifier from './Magnifier'
 import './PlotClip.css'
 
 var MAX_FIELD_ZOOM = 4.0;
+var EXPORT_URI='http://127.0.0.1:5000/export'
 
 class PlotClip extends Component {
   constructor(props) {
     super(props);
     this.actionFieldDelete = this.actionFieldDelete.bind(this);
     this.actionFieldClear = this.actionFieldClear.bind(this);
+    this.actionToggleMagnifier = this.actionToggleMagnifier.bind(this);
     this.boundsDone = this.boundsDone.bind(this);
     this.clicked = this.clicked.bind(this);
     this.fieldCornerMoveStart = this.fieldCornerMoveStart.bind(this);
@@ -28,7 +31,9 @@ class PlotClip extends Component {
     this.plotsCols = this.plotsCols.bind(this);
     this.plotCountsDone = this.plotCountsDone.bind(this);
     this.plotDefsDone = this.plotDefsDone.bind(this);
+    this.plotsInset = this.plotsInset.bind(this);
     this.plotsRows = this.plotsRows.bind(this);
+    this.saveBoundaries = this.saveBoundaries.bind(this);
     this.toolOptionsField = this.toolOptionsField.bind(this);
     this.toolOptionsPlotCount = this.toolOptionsPlotCount.bind(this);
 
@@ -40,18 +45,25 @@ class PlotClip extends Component {
                   was_drawing: false,
                   have_bounds: false,
                   current_tool: 0,
+                  magnifier: true,
                   plot_rows: 1,
                   plot_cols: 1,
-                 };
+                  top_inset_pct: 0.0,
+                  right_inset_pct: 0.0,
+                  bottom_inset_pct: 0.0,
+                  left_inset_pct: 0.0,
+              };
   }
 
   bounds_actions = [
-  {id: 'delete_point', name: 'Delete last point', description: "Delete Last Point", tool_uri: process.env.PUBLIC_URL + '/Delete.png', state: 1, tool_click: ()=>this.actionFieldDelete()},
-  {id: 'clear_points', name: 'Clear all points', description: "Clear Points", tool_uri: process.env.PUBLIC_URL + '/Clear.png', state: 1, tool_click: ()=>this.actionFieldClear()},
-//  {id: 'toggle_magnifier', name: 'Shows and hides magnifier', description: "Toggle Magnifier", tool_uri: process.env.PUBLIC_URL + '/Magnifier.png', state: 0, tool_click: ()=>this.actionToggleMagnifier()},
+  {id: 'delete_point', name: 'Delete last point', description: "Delete Last Point", tool_uri: process.env.PUBLIC_URL + '/Delete.png', state: 1, tool_click: (ev)=>this.actionFieldDelete(ev)},
+  {id: 'clear_points', name: 'Clear all points', description: "Clear Points", tool_uri: process.env.PUBLIC_URL + '/Clear.png', state: 1, tool_click: (ev)=>this.actionFieldClear(ev)},
+  {id: 'toggle_magnifier', name: 'Toggles magnifier', description: "Toggle Magnifier", tool_uri: process.env.PUBLIC_URL + '/Magnifier.png', state: 0, tool_click: (ev)=>this.actionToggleMagnifier(ev)},
   ];
 
-  plots_actions = [];
+  plots_actions = [
+  {id: 'toggle_magnifier', name: 'Toggles magnifier', description: "Toggle Magnifier", tool_uri: process.env.PUBLIC_URL + '/Magnifier.png', state: 0, tool_click: (ev)=>this.actionToggleMagnifier(ev)},
+  ];
 
   adjustment_actions = [];
 
@@ -97,9 +109,13 @@ class PlotClip extends Component {
   };
 
   corner_move_idx = -1;
+  cursor_last_page_x =  0;
+  cursor_last_page_y = 0;
 
   componentDidMount(){
     document.addEventListener("keydown", this.keyPress, false);
+
+    this.setState({offset_x:0});
   }
 
   componentWillUnmount(){
@@ -141,6 +157,8 @@ class PlotClip extends Component {
     if (new_points_x.length > 3) {
       new_state['have_bounds'] = true;
       new_state['drawing'] = false;
+      new_state['magnifier'] = false;
+      this.boundsDone();
     }
 
     this.setState(new_state);
@@ -155,6 +173,8 @@ class PlotClip extends Component {
         this.actionFieldDelete();
       } else if ((ev.key === 'c') || (ev.key === 'C')) {
         this.actionFieldClear();
+      } else if ((ev.key === 'm') || (ev.key === 'M')) {
+        this.setState({magnifier: !this.state.magnifier});
       }
     }
   }
@@ -175,6 +195,8 @@ class PlotClip extends Component {
   }
 
   mouseMove(ev) {
+    this.cursor_last_page_x = ev.pageX;
+    this.cursor_last_page_y = ev.pageY;
     if (this.state.drawing) {
       let client_rect = ev.target.getBoundingClientRect();
       let cur_x = ev.clientX - client_rect.x;
@@ -262,6 +284,12 @@ class PlotClip extends Component {
     this.setState({points_x: [], points_y: []});
   }
 
+  actionToggleMagnifier(ev) {
+    const is_active = !this.state.magnifier;
+    this.plots_actions['state'] = is_active ? 0 : 1;
+    this.setState({magnifier: is_active});
+  }
+
   plotsCols(ev) {
     const num_cols = ev.target.value;
     this.setState({plot_cols: num_cols});
@@ -272,18 +300,29 @@ class PlotClip extends Component {
     this.setState({plot_rows: num_rows});
   }
 
+  plotsInset(top, right, bottom, left) {
+    this.setState({top_inset_pct: top, right_inset_pct: right, bottom_inset_pct: bottom, left_inset_pct: left});
+  }
+
   toolOptionsField() {
-    return (
+    /*
       <div style={{disply:"flex", displayDirection:"column", justifyContent: "space-around"}} >
         <div id="tool-options-plot-navigation" className="tool-options-plot-navigation">
           <SvgButton enabled={false} left={true} />
           <SvgButton enabled={this.state.have_bounds} left={false} onClicked={this.boundsDone} />
         </div>
       </div>
-    );
+    */
+    return (<div/>);
   }
 
   toolOptionsPlotCount() {
+    /*
+        <div id="tool-options-plot-navigation" className="tool-options-plot-navigation">
+          <SvgButton enabled={true} left={true} onClicked={this.getBounds} />
+          <SvgButton enabled={true} left={false} onClicked={this.plotCountsDone} />
+        </div>
+    */
     return (
       <div style={{disply:"flex", displayDirection:"column", justifyContent: "space-around"}} >
         <div style={{display:"grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "10px"}} >
@@ -291,29 +330,33 @@ class PlotClip extends Component {
             <input id="plot_cols" type="number" min="1" max="1000" placeholder={this.state.plot_cols.toString()} size="10" style={{gridColumn: 2, maxWidth: "100px"}} onChange={this.plotsCols}></input>
             <label htmlFor="plot_rows" style={{gridColumn: 1}}>Number of plot rows:</label>
             <input id="plot_rows" type="number" min="1" max="1000" placeholder={this.state.plot_rows.toString()} size="10" style={{gridColumn: 2, maxWidth: "100px"}} onChange={this.plotsRows}></input>
-        </div>
-        <div id="tool-options-plot-navigation" className="tool-options-plot-navigation">
-          <SvgButton enabled={true} left={true} onClicked={this.getBounds} />
-          <SvgButton enabled={true} left={false} onClicked={this.plotCountsDone} />
+            <PlotAdjustment onUpdate={this.plotsInset} 
+                top_pct={this.state.top_inset_pct}
+                right_pct={this.state.right_inset_pct} 
+                bottom_pct={this.state.bottom_inset_pct}
+                left_pct={this.state.left_inset_pct}/>
+            <button id="save_file" type="button" style={{gridColumn: 1}} onClick={this.saveBoundaries}>Save boundaries</button>
         </div>
       </div>
     );
   }
 
   toolOptionsPlotAdjustment() {
-    return (
-      <React.Fragment>
-        <div style={{disply:"flex", displayDirection:"column", justifyContent: "space-around"}} >
-          <div style={{width:"50%"}} >&nbsp;</div>
-          <PlotAdjustment />
-          <div style={{width:"50%"}} >&nbsp;</div>
-        </div>
+    return this.toolOptionsPlotCount();
+    /*
         <div id="tool-options-plot-navigation" className="tool-options-plot-navigation">
           <SvgButton enabled={true} left={true} onClicked={this.getPlotCounts} />
           <SvgButton enabled={false} left={false} onClicked={this.plotDefsDone} />
         </div>
+    */
+/*    return (
+      <React.Fragment>
+        <div style={{disply:"flex", displayDirection:"column", justifyContent: "space-around"}} >
+          <div style={{width:"50%"}} >&nbsp;</div>
+          <div style={{width:"50%"}} >&nbsp;</div>
+        </div>
       </React.Fragment>
-      );
+      );*/
   }
 
   get_polyline() {
@@ -362,6 +405,10 @@ class PlotClip extends Component {
       const bot_ry = points_y[1] + ((idx_row + 1) * right_seg_dist.y);
       const bot_slope = (bot_ry - bot_ly) / (bot_rx - bot_lx);
 
+      if (isNaN(top_slope) || isNaN(bot_slope)) {
+        continue;
+      }
+
       for (let idx_col = 0; idx_col < cols; idx_col++) {
         const top_col_dist = {x: (top_rx - top_lx) / cols, y: (top_ry - top_ly) / cols};
         const bottom_col_dist = {x: (bot_rx - bot_lx) / cols, y: (bot_ry - bot_ly) / cols};
@@ -373,10 +420,20 @@ class PlotClip extends Component {
         const right_ux = top_lx + ((idx_col + 1) * top_col_dist.x);
         const right_bx = bot_lx + ((idx_col + 1) * bottom_col_dist.x);
 
-        const ul_pt = {x: left_ux,  y: (left_ux - top_lx) * top_slope + top_ly};
-        const ur_pt = {x: right_ux, y: (right_ux - top_lx) * top_slope + top_ly};
-        const lr_pt = {x: right_bx, y: (right_bx - bot_lx) * bot_slope + bot_ly};
-        const ll_pt = {x: left_bx,  y: (left_bx - bot_lx) * bot_slope + bot_ly};
+        const adjust_ul_x = (right_ux - left_ux) * this.state.left_inset_pct;
+        const adjust_ur_x = (right_ux - left_ux) * this.state.right_inset_pct;
+        const adjust_bl_x = (right_bx - left_bx) * this.state.left_inset_pct;
+        const adjust_br_x = (right_bx - left_bx) * this.state.right_inset_pct;
+
+        const adjust_ul_y = (bot_ly - top_ly) * this.state.top_inset_pct;
+        const adjust_ur_y = (bot_ry - top_ry) * this.state.top_inset_pct;
+        const adjust_bl_y = (bot_ly - top_ly) * this.state.bottom_inset_pct;
+        const adjust_br_y = (bot_ry - top_ry) * this.state.bottom_inset_pct;
+
+        const ul_pt = {x: left_ux + adjust_ul_x,  y: (left_ux - top_lx) * top_slope + top_ly + adjust_ul_y};
+        const ur_pt = {x: right_ux - adjust_ur_x, y: (right_ux - top_lx) * top_slope + top_ly + adjust_ur_y};
+        const lr_pt = {x: right_bx - adjust_br_x, y: (right_bx - bot_lx) * bot_slope + bot_ly - adjust_br_y};
+        const ll_pt = {x: left_bx + adjust_bl_x,  y: (left_bx - bot_lx) * bot_slope + bot_ly - adjust_bl_y};
 
         let plot =         ((ul_pt.x * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_x)
                    + ' ' + ((ul_pt.y * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_y)
@@ -395,8 +452,8 @@ class PlotClip extends Component {
     return plotlines;
   }
 
-  imageLoaded(e) {
-    const el_rect = e.target.getBoundingClientRect();
+  imageLoaded(ev) {
+    const el_rect = ev.target.getBoundingClientRect();
     const frame = document.getElementById('plotclip-image-wrap');
     let el_width = el_rect.width;
     let el_height = el_rect.height;
@@ -411,8 +468,8 @@ class PlotClip extends Component {
       el_width = frame.clientWidth * ratio_y;
       el_height = frame.clientHeight;
     }
-    e.target.parentNode.style.width = el_width + "px";
-    e.target.parentNode.style.height = el_height + "px";
+    ev.target.parentNode.style.width = el_width + "px";
+    ev.target.parentNode.style.height = el_height + "px";
 
     let svg_el = document.getElementById('field_bounds');
     if (svg_el) {
@@ -421,6 +478,31 @@ class PlotClip extends Component {
     } else {
       console.log("NO SVG ELEMENT FOUND");
     }
+  }
+
+  saveBoundaries(ev) {
+    console.log(this.state);
+    console.log(this.plots_display_info);
+    const formData = new FormData();
+    const points = this.state.points_x.map((coord_x, idx) => {return [coord_x, this.state.points_y[idx] ]});
+
+    formData.append('image_width', this.plots_display_info.img_width);
+    formData.append('image_height', this.plots_display_info.img_height);
+    formData.append('rows', this.state.plot_rows);
+    formData.append('cols', this.state.plot_cols);
+    formData.append('inset_pct', this.state.top_inset_pct + ',' + this.state.right_inset_pct + ',' + this.state.bottom_inset_pct + ',' + this.state.left_inset_pct);
+    formData.append('points', JSON.stringify(points));
+
+    console.log("URL:",EXPORT_URI + '/' + this.props.image_details.name);
+    fetch(EXPORT_URI + '/' + this.props.image_details.name, {
+      method: 'POST',
+      body: formData,
+      }
+    )
+    .then(response => response.json())
+    .then(success => {console.log(success);})
+    .catch(error => {console.log('ERROR'); console.log(error);});
+
   }
 
   render_field() {
@@ -449,21 +531,65 @@ class PlotClip extends Component {
             }
           )}
         </svg>
-        <GlassMagnifier id="magnifier"
-          imageSrc={this.props.image_uri}
-          cursorStyle="crosshair"
-          square={true}
-          onImageLoad={this.imageLoaded}
-          mouseActivation={MOUSE_ACTIVATION.DOUBLE_CLICK}
-          touchActivation={TOUCH_ACTIVATION.DOUBLE_TAP}
-          style={{"gridColumn":"1", "gridRow":"1"}}
-        />
+        <div id="field_image_wrapper"className="field_image_wrapper">
+          <img id="field_image" className="field_image" src={this.props.image_uri} alt="Orthomosaic of field" />
+        </div>
+          <GlassMagnifier id="magnifier"
+            imageSrc={this.props.image_uri}
+            cursorStyle="crosshair"
+            square={true}
+            onImageLoad={this.imageLoaded}
+            mouseActivation={MOUSE_ACTIVATION.DOUBLE_CLICK}
+            touchActivation={TOUCH_ACTIVATION.DOUBLE_TAP}
+            style={{"gridColumn":"1", "gridRow":"1"}}
+          />
       </React.Fragment>
     );
   }
 
-  render_plots() {
-    if (this.corner_move_idx < 0) {
+  render_plots(tool_id) {
+    if (tool_id === 0) {
+      let el = document.getElementById('plotclip-image-grid');
+      if (!el) {
+        return;
+      }
+      let el_rect = el.getBoundingClientRect();
+      const field_width = el_rect.width;
+      const field_height = el_rect.height;
+
+      let min_x = 0;
+      let min_y = 0;
+
+      let disp_image_width = this.props.image_details.width * this.props.image_details.scale;
+      let disp_image_height = this.props.image_details.height * this.props.image_details.scale;
+
+      let field_disp_scale = field_width > field_height
+                                ? Math.floor(10.0 * Math.max(1.0, Math.min(MAX_FIELD_ZOOM, 500 / field_width))) / 10.0
+                                : Math.floor(10.0 * Math.max(1.0, Math.min(MAX_FIELD_ZOOM, 500 / field_height))) / 10.0;
+      let img_disp_scale = this.props.image_details.width > this.props.image_details.height 
+                                ? 500 / (disp_image_width) 
+                                : 500 / (disp_image_height);
+
+      const img_width  = (disp_image_width  * img_disp_scale * field_disp_scale);
+      const img_height = (disp_image_height * img_disp_scale * field_disp_scale);
+
+      // Image size needs to be considered
+      const field_center_x = (min_x + (field_width / 2.0)) * field_disp_scale;
+      const field_center_y = (min_y + (field_height / 2.0)) * field_disp_scale;
+      const img_disp_ul_x = field_center_x - (500 / 2.0);
+      const img_disp_ul_y = field_center_y - (500 / 2.0);
+
+      const x_shift = img_disp_ul_x > 0 ? img_disp_ul_x : 0;
+      const y_shift = img_disp_ul_y > 0 ? img_disp_ul_y : 0;
+
+      this.plots_display_info.img_width = img_width;
+      this.plots_display_info.img_height = img_height;
+      this.plots_display_info.offset_x = -x_shift;
+      this.plots_display_info.offset_y = -y_shift;
+      this.plots_display_info.field_disp_scale = field_disp_scale;
+      this.plots_display_info.img_display_scale = img_disp_scale;
+
+    } else if (this.corner_move_idx < 0) {
       // Get the bonds of the field
       const img_x = this.state.points_x;
       const img_y = this.state.points_y;
@@ -523,7 +649,7 @@ class PlotClip extends Component {
              baseProfile="full"
              width="500" height="500"
              xmlns="http://www.w3.org/2000/svg">
-          <polygon points={polyline} stroke="white" fill="none" strokeWidth="3" />
+          {polyline && <polygon points={polyline} stroke="white" fill="none" strokeWidth="3" />}
           {
             plot_lines.map((plot, idx) => {
               return (<polygon points={plot} key={idx} stroke="blue" fill="lightgrey" strokeWidth= "2" fillOpacity=".7" />);
@@ -554,6 +680,8 @@ class PlotClip extends Component {
                      backgroundPosition: bg_position}}>
           </div>
         </div>
+        {this.state.magnifier && <Magnifier parent_id="field_image_wrapper" source_uri={this.props.image_uri} zoom="2.0" 
+                                      startX={this.cursor_last_page_x} startY={this.cursor_last_page_y} />}
       </React.Fragment>
     );
   }
@@ -565,11 +693,14 @@ class PlotClip extends Component {
     let enter_func = this.state.current_tool === 0 ? this.mouseEnter : this.mouseEnter;
     let up_func = this.state.current_tool === 0 ? null : this.fieldCornerUp;
 
-    return (
-      <div id="plotclip-wrap" className="plotclip-wrap" >
+    /*
         <div id="plotclip-toolbar-wrap" className="plotclip-toolbar-wrap" >
           <Toolbar tools={this.tools} />
         </div>
+    */
+
+    return (
+      <div id="plotclip-wrap" className="plotclip-wrap" >
         <div id="plotclip-image-wrap" 
              className="plotclip-image-wrap" 
              onClick={click_func} 
@@ -578,8 +709,7 @@ class PlotClip extends Component {
              onMouseEnter={enter_func}
              onMouseUp={up_func} >
           <div id="plotclip-image-grid" className="plotclip-image-grid" >
-            {(this.state.current_tool === 0) && this.render_field()}
-            {(this.state.current_tool === 1 || this.state.current_tool === 2) && this.render_plots()}
+          {this.render_plots(this.state.current_tool)}
         </div>
         </div>
         <div id="plotclip-tool-actions" className="plotclip-tool-actions" >

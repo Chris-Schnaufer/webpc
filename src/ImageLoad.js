@@ -7,11 +7,12 @@ var FILE_UPLOAD_URI='http://127.0.0.1:5000/files'
 class ImageLoad extends Component {
   constructor(props) {
     super(props)
-    this.handleStart = this.handleStart.bind(this);
-    this.handleDrop = this.handleDrop.bind(this);
-    this.handleOver = this.handleOver.bind(this);
-    this.handleEnd = this.handleEnd.bind(this);
     this.browseImage = this.browseImage.bind(this);
+    this.fileBrowsed = this.fileBrowsed.bind(this);
+    this.handleDrop = this.handleDrop.bind(this);
+    this.handleEnd = this.handleEnd.bind(this);
+    this.handleOver = this.handleOver.bind(this);
+    this.handleStart = this.handleStart.bind(this);
   }
 
   browseImage() {
@@ -111,7 +112,7 @@ class ImageLoad extends Component {
           </div>
           <div id="imagedrop-browse" className="imagedrop-browse">
             <button type="button" id="imagedrop-file-browse" className={this.props.small ? "imagedrop-file-browse-small" : "imagedrop-file-browse"} onClick={this.browseImage}>Browse Image</button>
-            <input type="file" id="imagedrop-file-find" accept="image/*" multiple className="imagedrop-file-pick" onChange={this.fileBrowsed.bind(this)}></input>
+            <input type="file" id="imagedrop-file-find" accept="image/*" multiple className="imagedrop-file-pick" onChange={this.fileBrowsed}></input>
           </div>
         </div>
       </div>

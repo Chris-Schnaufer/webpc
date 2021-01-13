@@ -41,7 +41,7 @@ class App extends Component {
     const image_bar_full = this.state.image_bar_full;
     return (
       <div id="App">
-        <Titlebar title="Image Plot Clipping" />
+        <Titlebar title="Plot Boundaries" />
           <ImageBar reload={should_reload_images} 
                     done_reload={this.image_reload_done}
                     selected_func={this.image_selected}

@@ -57,6 +57,7 @@
 .field_image_wrapper {
     grid-column: 1;
     grid-row: 1;
+    cursor: crosshair;
 }
 
 .field_image {

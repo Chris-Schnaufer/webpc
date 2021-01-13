@@ -1,0 +1,17 @@
+
+.magnifier_frame {
+    position: absolute;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.magnifier {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    border: 2px solid black;
+    left: 0px;
+    top: 0px;
+    pointer-events: none;
+    z-index: 99999999;
+}
