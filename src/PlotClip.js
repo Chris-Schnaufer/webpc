@@ -392,17 +392,17 @@ class PlotClip extends Component {
 
     for (let idx_row =  0; idx_row < rows; idx_row++) {
       // Calculate the top side for the row of plots
-      const top_lx = points_x[0] + (idx_row * left_seg_dist.x);
-      const top_ly = points_y[0] + (idx_row * left_seg_dist.y);
-      const top_rx = points_x[1] + (idx_row * right_seg_dist.x);
-      const top_ry = points_y[1] + (idx_row * right_seg_dist.y);
+      const top_lx = points_x[0] + (idx_row * left_seg_dist.x) + (left_seg_dist.x * this.state.top_inset_pct);
+      const top_ly = points_y[0] + (idx_row * left_seg_dist.y) + (left_seg_dist.y * this.state.top_inset_pct);
+      const top_rx = points_x[1] + (idx_row * right_seg_dist.x) + (right_seg_dist.x * this.state.top_inset_pct);
+      const top_ry = points_y[1] + (idx_row * right_seg_dist.y) + (right_seg_dist.y * this.state.top_inset_pct);
       const top_slope = (top_ry - top_ly) / (top_rx - top_lx);
 
       // Calculate the bottom side for the row of plots
-      const bot_lx = points_x[0] + ((idx_row + 1) * left_seg_dist.x);
-      const bot_ly = points_y[0] + ((idx_row + 1) * left_seg_dist.y);
-      const bot_rx = points_x[1] + ((idx_row + 1) * right_seg_dist.x);
-      const bot_ry = points_y[1] + ((idx_row + 1) * right_seg_dist.y);
+      const bot_lx = points_x[0] + ((idx_row + 1) * left_seg_dist.x) - (left_seg_dist.x * this.state.bottom_inset_pct);
+      const bot_ly = points_y[0] + ((idx_row + 1) * left_seg_dist.y) - (left_seg_dist.y * this.state.bottom_inset_pct);
+      const bot_rx = points_x[1] + ((idx_row + 1) * right_seg_dist.x) - (right_seg_dist.x * this.state.bottom_inset_pct);
+      const bot_ry = points_y[1] + ((idx_row + 1) * right_seg_dist.y) - (right_seg_dist.y * this.state.bottom_inset_pct);
       const bot_slope = (bot_ry - bot_ly) / (bot_rx - bot_lx);
 
       if (isNaN(top_slope) || isNaN(bot_slope)) {
@@ -412,15 +412,16 @@ class PlotClip extends Component {
       for (let idx_col = 0; idx_col < cols; idx_col++) {
         const top_col_dist = {x: (top_rx - top_lx) / cols, y: (top_ry - top_ly) / cols};
         const bottom_col_dist = {x: (bot_rx - bot_lx) / cols, y: (bot_ry - bot_ly) / cols};
+  
         // Calculating the left side of the plot for left points
-        const left_ux = top_lx + (idx_col * top_col_dist.x);
-        const left_bx = bot_lx + (idx_col * bottom_col_dist.x);
+        const left_ux = top_lx + (idx_col * top_col_dist.x) + (top_col_dist.x * this.state.left_inset_pct);
+        const left_bx = bot_lx + (idx_col * bottom_col_dist.x) + (bottom_col_dist.x * this.state.left_inset_pct);
 
         // Calculating the right side of the plot for right points
-        const right_ux = top_lx + ((idx_col + 1) * top_col_dist.x);
-        const right_bx = bot_lx + ((idx_col + 1) * bottom_col_dist.x);
+        const right_ux = top_lx + ((idx_col + 1) * top_col_dist.x) - (top_col_dist.x * this.state.right_inset_pct);
+        const right_bx = bot_lx + ((idx_col + 1) * bottom_col_dist.x) - (bottom_col_dist.x * this.state.right_inset_pct);
 
-        const adjust_ul_x = (right_ux - left_ux) * this.state.left_inset_pct;
+/*        const adjust_ul_x = ((right_ux - left_ux) * this.state.left_inset_pct);
         const adjust_ur_x = (right_ux - left_ux) * this.state.right_inset_pct;
         const adjust_bl_x = (right_bx - left_bx) * this.state.left_inset_pct;
         const adjust_br_x = (right_bx - left_bx) * this.state.right_inset_pct;
@@ -434,6 +435,12 @@ class PlotClip extends Component {
         const ur_pt = {x: right_ux - adjust_ur_x, y: (right_ux - top_lx) * top_slope + top_ly + adjust_ur_y};
         const lr_pt = {x: right_bx - adjust_br_x, y: (right_bx - bot_lx) * bot_slope + bot_ly - adjust_br_y};
         const ll_pt = {x: left_bx + adjust_bl_x,  y: (left_bx - bot_lx) * bot_slope + bot_ly - adjust_bl_y};
+*/
+
+        var ul_pt = {x: left_ux,  y: (left_ux - top_lx) * top_slope + top_ly };
+        var ur_pt = {x: right_ux, y: (right_ux - top_lx) * top_slope + top_ly};
+        var lr_pt = {x: right_bx, y: (right_bx - bot_lx) * bot_slope + bot_ly};
+        var ll_pt = {x: left_bx,  y: (left_bx - bot_lx) * bot_slope + bot_ly};
 
         let plot =         ((ul_pt.x * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_x)
                    + ' ' + ((ul_pt.y * this.plots_display_info.field_disp_scale) + this.plots_display_info.offset_y)
