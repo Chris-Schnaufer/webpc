@@ -71,7 +71,7 @@ class ImageLoad extends Component {
       }
     )
     .then(response => response.json())
-    .then(success => {console.log(success); this.props.have_uploaded();})
+    .then(success => {this.props.have_uploaded();})
     .catch(error => {console.log('ERROR'); console.log(error);}
     );
   }

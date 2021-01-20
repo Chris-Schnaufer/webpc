@@ -488,23 +488,15 @@ class PlotClip extends Component {
   }
 
   generateBoundaries(ev) {
-    console.log("Props:", this.props);
-    console.log("State:", this.state);
-    console.log("Disp:", this.plots_display_info);
     const formData = new FormData();
     const points = this.state.points_x.map((coord_x, idx) => {return [coord_x, this.state.points_y[idx] ]});
 
-    formData.append('image_width', this.plots_display_info.img_width);//this.props.image_details.width);//
-    formData.append('image_height', this.plots_display_info.img_height);//this.props.image_details.height);//
-    formData.append('offset_x', -this.plots_display_info.offset_x);
-    formData.append('offset_y', -this.plots_display_info.offset_y);
     formData.append('point_scale', this.plots_display_info.img_display_scale * this.props.image_details.scale);
     formData.append('rows', this.state.plot_rows);
     formData.append('cols', this.state.plot_cols);
     formData.append('inset_pct', this.state.top_inset_pct + ',' + this.state.right_inset_pct + ',' + this.state.bottom_inset_pct + ',' + this.state.left_inset_pct);
     formData.append('points', JSON.stringify(points));
 
-    console.log("URL:",EXPORT_URI + '/' + this.props.image_details.name);
     fetch(EXPORT_URI + '/' + this.props.image_details.name, {
       method: 'POST',
       body: formData,
@@ -512,6 +504,7 @@ class PlotClip extends Component {
     )
     .then(response => response.blob())
     .then(blob => {
+      // Create a download object
       const url = window.URL.createObjectURL(
         new Blob([blob]),
       );

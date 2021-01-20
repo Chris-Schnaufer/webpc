@@ -160,6 +160,12 @@ def _generate_feature(plot: list, image_info: dict, geometry_properties: dict = 
         y_pct = point[1] / image_info['size'][1]
         return_coords.append([image_info['bounds'][0] + (x_pct * bounds_x_size), image_info['bounds'][1] + (y_pct * bounds_y_size)])
 
+    # Check for closing the polygon
+    if plot[0] != plot[len(plot) - 1]:
+        x_pct = plot[0][0] / image_info['size'][0]
+        y_pct = plot[0][1] / image_info['size'][1]
+        return_coords.append([image_info['bounds'][0] + (x_pct * bounds_x_size), image_info['bounds'][1] + (y_pct * bounds_y_size)])
+
     return_dict['geometry']['coordinates'].append(return_coords)
     if geometry_properties is not None:
         return_dict['properties'] = geometry_properties
@@ -291,10 +297,6 @@ def export_plots(name: str = None):
         return 'Not a georeferenced image', 400
 
     # Get the form contents
-    plot_img_width = float(request.form['image_width'])
-    plot_img_height = float(request.form['image_height'])
-    offset_x = float(request.form['offset_x'])
-    offset_y = float(request.form['offset_y'])
     point_scale = float(request.form['point_scale'])
     plot_rows = int(request.form['rows'])
     plot_cols = int(request.form['cols'])
@@ -303,9 +305,7 @@ def export_plots(name: str = None):
     points = json.loads(request.form['points'])
 
     # Convert points to original image dimensions
-    width_scale = image_info['size'][0] / plot_img_width
-    height_scale = image_info['size'][1] / plot_img_height
-    img_points = [{'x': ((x/point_scale)), 'y': ((y/point_scale))} for (x, y) in points]
+    img_points = [{'x': x / point_scale, 'y': y / point_scale} for (x, y) in points]
 
     # Loop through and map the points to coordinates. Everything is relative to the first point
     right_seg_dist = {'x': (img_points[2]['x'] - img_points[1]['x']) / plot_rows,
@@ -314,11 +314,6 @@ def export_plots(name: str = None):
     left_seg_dist = {'x': (img_points[3]['x'] - img_points[0]['x']) / plot_rows,
                      'y': (img_points[3]['y'] - img_points[0]['y']) / plot_rows
                     }
-    print("POINTS:",img_points,points)
-    print("SIZE:",plot_img_width,plot_img_height)
-    print("OFF:",offset_x,offset_y)
-    print("SCALE:",width_scale,height_scale)
-    print("DIST:",right_seg_dist,left_seg_dist," (",right_seg_dist['y'] * plot_rows,")")
 
     features = []
     plot_index = 1
@@ -379,5 +374,5 @@ def export_plots(name: str = None):
     response = make_response(json.dumps(return_geometry))
     response.headers.set('Content-Type', 'text')
     response.headers.set('Content-Disposition', 'attachment', filename='plots.geojson')
+
     return response
-#    return json.dumps(return_geometry)

@@ -40,7 +40,6 @@ class Magnifier extends Component {
   imgLoad(img) {
     this.image_width = img.width;
     this.image_height = img.height;
-    console.log("IMG:",this.image_width,this.image_height);
 
     // Force an initialization
     this.initializeUI();
@@ -121,14 +120,11 @@ class Magnifier extends Component {
       return;
     }
 
-    console.log("adjustMagnifier",pageX,pageY);
     const el_rect = el.getBoundingClientRect();
     const el_frame_rect = el_frame.getBoundingClientRect();
     const parent_rect = el_parent.getBoundingClientRect();
     let top_pos = (pageY - (el_rect.height / 2.0));
     let left_pos = (pageX - (el_rect.width / 2.0));
-    console.log("Magnif rect: ", el_rect);
-    console.log("Parent rect: ", parent_rect);
 
     let el_style = window.getComputedStyle(el, null);
     let left_border = parseInt(el_style.getPropertyValue('border-left-width'));
@@ -143,16 +139,12 @@ class Magnifier extends Component {
     el.style.backgroundRepeat = "no-repeat";
 
     this.conversion_factor = this.image_height / parent_rect.height;
-    console.log("CONV",this.image_height,parent_rect.height);
     let zoomed_height = this.image_height * this.state.zoom;
     let zoomed_width = this.image_width * this.state.zoom;
     let offset_top = (pageY - parent_rect.y) * this.conversion_factor * this.state.zoom;
     let offset_left = (pageX - parent_rect.x) * this.conversion_factor * this.state.zoom;
-    console.log("CALC: ",pageX - parent_rect.x,pageY - parent_rect.y," => ",offset_left,offset_top);
     offset_top -= (((el.clientHeight) / 2.0) / this.state.zoom);
     offset_left -= (((el.clientWidth) / 2.0) / this.state.zoom);
-    console.log("Offset:",offset_left,offset_top,"(",left_pos, top_pos,") (",(((el.clientWidth) / 2.0) / this.state.zoom),(((el.clientHeight) / 2.0) / this.state.zoom),")",this.conversion_factor);
-    console.log("Size:",zoomed_width,zoomed_height);
 
     el.style.backgroundPosition = -offset_left + "px " + -offset_top + "px";
     el.style.backgroundSize = zoomed_width + "px " + zoomed_height + "px";
