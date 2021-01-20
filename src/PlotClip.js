@@ -21,6 +21,7 @@ class PlotClip extends Component {
     this.fieldCornerMoveStart = this.fieldCornerMoveStart.bind(this);
     this.fieldCornerMove = this.fieldCornerMove.bind(this);
     this.fieldCornerUp = this.fieldCornerUp.bind(this);
+    this.generateBoundaries = this.generateBoundaries.bind(this);
     this.getBounds = this.getBounds.bind(this);
     this.getPlotCounts = this.getPlotCounts.bind(this);
     this.imageLoaded = this.imageLoaded.bind(this);
@@ -33,7 +34,6 @@ class PlotClip extends Component {
     this.plotDefsDone = this.plotDefsDone.bind(this);
     this.plotsInset = this.plotsInset.bind(this);
     this.plotsRows = this.plotsRows.bind(this);
-    this.saveBoundaries = this.saveBoundaries.bind(this);
     this.toolOptionsField = this.toolOptionsField.bind(this);
     this.toolOptionsPlotCount = this.toolOptionsPlotCount.bind(this);
 
@@ -335,7 +335,7 @@ class PlotClip extends Component {
                 right_pct={this.state.right_inset_pct} 
                 bottom_pct={this.state.bottom_inset_pct}
                 left_pct={this.state.left_inset_pct}/>
-            <button id="save_file" type="button" style={{gridColumn: 1}} onClick={this.saveBoundaries}>Save boundaries</button>
+            <button id="save_file" type="button" style={{gridColumn: 1}} onClick={this.generateBoundaries}>Generate boundaries</button>
         </div>
       </div>
     );
@@ -487,14 +487,18 @@ class PlotClip extends Component {
     }
   }
 
-  saveBoundaries(ev) {
-    console.log(this.state);
-    console.log(this.plots_display_info);
+  generateBoundaries(ev) {
+    console.log("Props:", this.props);
+    console.log("State:", this.state);
+    console.log("Disp:", this.plots_display_info);
     const formData = new FormData();
     const points = this.state.points_x.map((coord_x, idx) => {return [coord_x, this.state.points_y[idx] ]});
 
-    formData.append('image_width', this.plots_display_info.img_width);
-    formData.append('image_height', this.plots_display_info.img_height);
+    formData.append('image_width', this.plots_display_info.img_width);//this.props.image_details.width);//
+    formData.append('image_height', this.plots_display_info.img_height);//this.props.image_details.height);//
+    formData.append('offset_x', -this.plots_display_info.offset_x);
+    formData.append('offset_y', -this.plots_display_info.offset_y);
+    formData.append('point_scale', this.plots_display_info.img_display_scale * this.props.image_details.scale);
     formData.append('rows', this.state.plot_rows);
     formData.append('cols', this.state.plot_cols);
     formData.append('inset_pct', this.state.top_inset_pct + ',' + this.state.right_inset_pct + ',' + this.state.bottom_inset_pct + ',' + this.state.left_inset_pct);
@@ -506,8 +510,24 @@ class PlotClip extends Component {
       body: formData,
       }
     )
-    .then(response => response.json())
-    .then(success => {console.log(success);})
+    .then(response => response.blob())
+    .then(blob => {
+      const url = window.URL.createObjectURL(
+        new Blob([blob]),
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `plots.geojson`,
+      );
+      // Append to html link element page
+      document.body.appendChild(link);
+      // Start download
+      link.click();
+      // Clean up and remove the link
+      link.parentNode.removeChild(link);
+    })
     .catch(error => {console.log('ERROR'); console.log(error);});
 
   }
