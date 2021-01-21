@@ -1,0 +1,10 @@
+.DS_Store
+.dockerignore
+.git
+.gitignore
+.idea
+**/*.xcf
+Dockerfile
+__pycache__
+uploads
+

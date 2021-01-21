@@ -8,14 +8,14 @@ import re
 from typing import Optional
 from osgeo import gdal, osr
 from PIL import Image
-from flask import Flask, request, send_file, make_response
+from flask import Flask, request, send_file, make_response, render_template
 from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/files": {"origins": "http://127.0.0.1:3000"}})
 
-FILE_SAVE_PATH = os.path.join(os.getcwd(), 'uploads')
+FILE_SAVE_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'uploads')
 FILE_DISPLAY_PATH = os.path.join(FILE_SAVE_PATH, 'display')
 FILE_THUMBNAIL_PATH = os.path.join(FILE_SAVE_PATH, 'thumbnails')
 MAX_DISPLAY_IMAGE_PIXEL = 1000
@@ -174,15 +174,20 @@ def _generate_feature(plot: list, image_info: dict, geometry_properties: dict = 
 
 
 @app.route('/')
+@cross_origin()
 def index():
     """Default page"""
-    return 'Resource not found', 400
+    #return 'Resource not found', 400
+    print("RENDERING TEMPLATE");
+    return render_template('index.html')
 
 
 @app.route('/files', methods=['GET', 'PUT'])
-@cross_origin(origin='127.0.0.1:3000', headers=['Content-Type','Authorization'])
+#@cross_origin(origin='127.0.0.1:3000', headers=['Content-Type','Authorization'])
+@cross_origin()
 def files() -> tuple:
     """Handles saving uploaded files and fetching existing file names"""
+    print("FILES");
     return_names = []
 
     if not os.path.exists(FILE_SAVE_PATH):
@@ -214,6 +219,7 @@ def files() -> tuple:
 
 
 @app.route('/img/<string:name>', methods=['GET'])
+@cross_origin()
 def image(name: str = None):
     """Returns the content of an image"""
     if name is None:
@@ -243,6 +249,7 @@ def image(name: str = None):
 
 
 @app.route('/thumb/<string:name>', methods=['GET'])
+@cross_origin()
 def thumbnail(name: str = None):
     """Returns the thumbnail of an image"""
     if name is None:
@@ -376,3 +383,7 @@ def export_plots(name: str = None):
     response.headers.set('Content-Disposition', 'attachment', filename='plots.geojson')
 
     return response
+
+if __name__ == '__main__':
+    app.run(debug=False)
+
