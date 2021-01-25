@@ -9,15 +9,18 @@ from typing import Optional
 from osgeo import gdal, osr
 from PIL import Image
 from flask import Flask, request, send_file, make_response, render_template
-from flask_cors import CORS, cross_origin
+from flask_cors import cross_origin
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/files": {"origins": "http://127.0.0.1:3000"}})
+
+# Override the default Pillow limit to 5GB files
+Image.MAX_IMAGE_PIXELS = (5 * 1024 * 1024 * 1024)
 
 FILE_SAVE_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'uploads')
 FILE_DISPLAY_PATH = os.path.join(FILE_SAVE_PATH, 'display')
 FILE_THUMBNAIL_PATH = os.path.join(FILE_SAVE_PATH, 'thumbnails')
+JSON_SAVE_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'json')
 MAX_DISPLAY_IMAGE_PIXEL = 1000
 MAX_THUMBNAIL_PIXEL = 100
 
@@ -177,17 +180,58 @@ def _generate_feature(plot: list, image_info: dict, geometry_properties: dict = 
 @cross_origin()
 def index():
     """Default page"""
-    #return 'Resource not found', 400
-    print("RENDERING TEMPLATE");
+    print("RENDERING TEMPLATE")
     return render_template('index.html')
 
 
+@app.route('/<string:filename>')
+@cross_origin()
+def sendfile(filename: str):
+    """Return root files"""
+    print("RETURN FILENAME:",filename)
+
+    fullpath = os.path.realpath(os.path.join(os.path.dirname(__file__), filename))
+    print("   FILE PATH:",fullpath)
+
+    if not filename or not os.path.exists(fullpath):
+        return 'Resource not found', 400
+
+    return send_file(fullpath)
+
+
+@app.route('/static/css/<string:filename>')
+@cross_origin()
+def sendcss(filename: str):
+    """Return CSS"""
+    print("RETURN CSS:",filename)
+
+    fullpath = os.path.realpath(os.path.join(os.path.dirname(__file__), 'css', filename))
+    print("   FILE PATH:",fullpath)
+
+    if not filename or not os.path.exists(fullpath):
+        return 'Resource not found', 400
+
+    return send_file(fullpath)
+
+
+@app.route('/static/js/<string:filename>')
+@cross_origin()
+def sendjs(filename: str):
+    """Return js"""
+    print("RETURN JS:",filename)
+
+    fullpath = os.path.realpath(os.path.join(os.path.dirname(__file__), 'js', filename))
+    print("   FILE PATH:",fullpath)
+
+    if not filename or not os.path.exists(fullpath):
+        return 'Resource not found', 400
+
+    return send_file(fullpath)
+
 @app.route('/files', methods=['GET', 'PUT'])
-#@cross_origin(origin='127.0.0.1:3000', headers=['Content-Type','Authorization'])
 @cross_origin()
 def files() -> tuple:
     """Handles saving uploaded files and fetching existing file names"""
-    print("FILES");
     return_names = []
 
     if not os.path.exists(FILE_SAVE_PATH):
@@ -204,16 +248,21 @@ def files() -> tuple:
     for one_file in os.listdir(FILE_SAVE_PATH):
         file_path = os.path.join(FILE_SAVE_PATH, one_file)
         if not os.path.isdir(file_path) and not one_file[0] == '.':
-            file_id = re.sub("[^0-9a-zA-Z]+", "", str(os.path.basename(one_file)))
-            img_width, img_height, img_scale = _get_image_dims_scale(file_path, MAX_DISPLAY_IMAGE_PIXEL)
-            return_names.append({'name': one_file,
-                                 'uri': request.url_root + 'img/' + one_file,
-                                 'thumbnail_uri': request.url_root + 'thumb/' + one_file,
-                                 'id': file_id,
-                                 'width': img_width,
-                                 'height': img_height,
-                                 'scale': img_scale,
-                                 })
+            try:
+                file_id = re.sub("[^0-9a-zA-Z]+", "", str(os.path.basename(one_file)))
+                img_width, img_height, img_scale = _get_image_dims_scale(file_path, MAX_DISPLAY_IMAGE_PIXEL)
+                return_names.append({'name': one_file,
+                                     'uri': '/img/' + one_file,
+                                     'thumbnail_uri': '/thumb/' + one_file,
+                                     'id': file_id,
+                                     'width': img_width,
+                                     'height': img_height,
+                                     'scale': img_scale,
+                                     })
+            except Exception as ex:
+                print("Files: exception of type %s was caught" % type(ex))
+                print(ex.args)
+                print(ex)
 
     return json.dumps(return_names)
 
@@ -307,6 +356,7 @@ def export_plots(name: str = None):
     point_scale = float(request.form['point_scale'])
     plot_rows = int(request.form['rows'])
     plot_cols = int(request.form['cols'])
+    save_filename = request.form['save_filename']
     (top_inset_pct, right_inset_pct, bottom_inset_pct, left_inset_pct) = \
                                 [float(pct.strip()) for pct in request.form['inset_pct'].split(',')]
     points = json.loads(request.form['points'])
@@ -378,12 +428,20 @@ def export_plots(name: str = None):
         'features': features
         }
 
-    response = make_response(json.dumps(return_geometry))
-    response.headers.set('Content-Type', 'text')
-    response.headers.set('Content-Disposition', 'attachment', filename='plots.geojson')
+    if save_filename:
+        if not os.path.exists(JSON_SAVE_PATH):
+            os.makedirs(JSON_SAVE_PATH)
+
+        with open(os.path.join(JSON_SAVE_PATH, save_filename), 'w') as out_file:
+            json.dump(return_geometry, out_file)
+
+        response = make_response(json.dumps({'status': 'Successfully saved %s' % save_filename}))
+    else:
+        response = make_response(json.dumps(return_geometry))
+        response.headers.set('Content-Type', 'text')
+        response.headers.set('Content-Disposition', 'attachment', filename='plots.geojson')
 
     return response
 
 if __name__ == '__main__':
     app.run(debug=False)
-

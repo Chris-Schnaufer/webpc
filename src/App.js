@@ -49,7 +49,9 @@ class App extends Component {
                     full_bar={image_bar_full}
                     expand_func={this.expand_image_bar}
           />
-        {this.state.selected_image != null ? <PlotClip image_uri={this.state.selected_image} image_details={this.state.image_details} /> : null}
+        {this.state.selected_image != null ? 
+              <PlotClip image_uri={window.location.origin.concat(this.state.selected_image)} image_details={this.state.image_details} /> :
+              null}
       </div>
     );
   }

@@ -8,7 +8,6 @@ RUN npm run build
 
 FROM python:3.9-slim-buster
 WORKDIR /app/flask_backend
-ENV PYTHONPATH "${PYTHONPATH}:/app"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -36,15 +35,17 @@ COPY requirements.txt .
 
 RUN python3 -m pip install -r requirements.txt
 
-COPY --from=build /app/react_frontend/build/* ./static/
+COPY --from=build /app/react_frontend/build/* ./
 RUN mkdir ./templates && \
-    mv ./static/index.html ./templates/ && \
-    mv ./static/manifest.json ./ && \
-    mv ./static/favicon.ico ./ 
+    mv ./index.html ./templates/
 
 COPY ./*.py ./
+COPY ./*.sh ./
+RUN chmod a+x *.sh
 
-#CMD python3 /app/flask_backend/main.py
-#CMD . venv/bin/activate && FLASK_APP=main.py python3 -m flask run
-# CMD python3 main.py
-CMD gunicorn -b 5000 main:app
+EXPOSE 5000
+
+ENV PYTHONPATH="${PYTHONPATH}:/app/react_frontend"  \
+    SERVER_DIR="/app/flask_backend"
+
+CMD gunicorn -w 4 -b 0.0.0.0:5000 --access-logfile '-' main:app

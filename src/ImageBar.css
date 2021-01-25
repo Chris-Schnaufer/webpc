@@ -26,6 +26,7 @@
     border-radius: 7px;
     background: content-box linear-gradient(white, lightblue);
     background-clip: content-box;
+    overflow: hidden;
 }
 
 .imagebar-image-wrap-small {
@@ -39,6 +40,7 @@
     border-radius: 7px;
     background: content-box linear-gradient(white, lightblue);
     background-clip: content-box;
+    overflow: hidden;
 }
 
 .imagebar-image {

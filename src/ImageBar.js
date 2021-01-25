@@ -3,7 +3,7 @@ import ImageLoad from './ImageLoad';
 import ExpandCollapse from './ExpandCollapse';
 import './ImageBar.css';
 
-var FILE_LIST_URI='http://127.0.0.1:5000/files';
+var FILE_LIST_URI=window.location.origin.concat('/files');
 
 class ImageBar extends Component {
   constructor(props) {
@@ -70,7 +70,12 @@ class ImageBar extends Component {
     return (
       images.map((image) => 
           <div key={image.id.toString()} id={"imagebar-image-wrap" + image.id.toString()} className={image_wrap_class} onClick={() => this.image_selected(image.uri, image)}>
-            <img id={"imagebar-image-"  + image.id.toString()} className={image_class} src={image.thumbnail_uri} alt={image.name} />
+            <img id={"imagebar-image-"  + image.id.toString()} 
+                 className={image_class}
+                 src={window.location.origin.concat(image.thumbnail_uri)}
+                 alt={image.name}
+                 title={image.name}
+                 />
             <label id={"imagebar-image-"  + image.id.toString() + "-label"} className={image_label_class} >
               {image.name}
             </label>

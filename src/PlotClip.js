@@ -8,7 +8,8 @@ import Magnifier from './Magnifier'
 import './PlotClip.css'
 
 var MAX_FIELD_ZOOM = 4.0;
-var EXPORT_URI='http://127.0.0.1:5000/export'
+var EXPORT_URI=window.location.origin.concat('/export');
+console.log(window.location,EXPORT_URI);
 
 class PlotClip extends Component {
   constructor(props) {
@@ -21,7 +22,7 @@ class PlotClip extends Component {
     this.fieldCornerMoveStart = this.fieldCornerMoveStart.bind(this);
     this.fieldCornerMove = this.fieldCornerMove.bind(this);
     this.fieldCornerUp = this.fieldCornerUp.bind(this);
-    this.generateBoundaries = this.generateBoundaries.bind(this);
+    this.downloadBoundaries = this.downloadBoundaries.bind(this);
     this.getBounds = this.getBounds.bind(this);
     this.getPlotCounts = this.getPlotCounts.bind(this);
     this.imageLoaded = this.imageLoaded.bind(this);
@@ -34,6 +35,8 @@ class PlotClip extends Component {
     this.plotDefsDone = this.plotDefsDone.bind(this);
     this.plotsInset = this.plotsInset.bind(this);
     this.plotsRows = this.plotsRows.bind(this);
+    this.plotsSaveFilename = this.plotsSaveFilename.bind(this);
+    this.saveBoundaries = this.saveBoundaries.bind(this);
     this.toolOptionsField = this.toolOptionsField.bind(this);
     this.toolOptionsPlotCount = this.toolOptionsPlotCount.bind(this);
 
@@ -54,6 +57,8 @@ class PlotClip extends Component {
                   left_inset_pct: 0.0,
               };
   }
+
+  jsonFileName='plots.geojson';
 
   bounds_actions = [
   {id: 'delete_point', name: 'Delete last point', description: "Delete Last Point", tool_uri: process.env.PUBLIC_URL + '/Delete.png', state: 1, tool_click: (ev)=>this.actionFieldDelete(ev)},
@@ -304,6 +309,11 @@ class PlotClip extends Component {
     this.setState({top_inset_pct: top, right_inset_pct: right, bottom_inset_pct: bottom, left_inset_pct: left});
   }
 
+  plotsSaveFilename(ev) {
+    const save_file = ev.target.value;
+    this.jsonFileName = save_file;
+  }
+
   toolOptionsField() {
     /*
       <div style={{disply:"flex", displayDirection:"column", justifyContent: "space-around"}} >
@@ -325,7 +335,11 @@ class PlotClip extends Component {
     */
     return (
       <div style={{disply:"flex", displayDirection:"column", justifyContent: "space-around"}} >
-        <div style={{display:"grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "10px"}} >
+        <div id="plot_file_name_wrapper" style={{marginBottom: "10px"}} >
+          <span style={{gridColumn: 1}} >File name:</span>
+          <span id="file_name" style={{gridColumn: 2}} >{this.props.image_details.name}</span>
+        </div>
+        <div style={{display:"grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "10px", maxWidth: "900px"}} >
             <label htmlFor="plot_cols" style={{gridColumn: 1}}>Number of plot columns:</label>
             <input id="plot_cols" type="number" min="1" max="1000" placeholder={this.state.plot_cols.toString()} size="10" style={{gridColumn: 2, maxWidth: "100px"}} onChange={this.plotsCols}></input>
             <label htmlFor="plot_rows" style={{gridColumn: 1}}>Number of plot rows:</label>
@@ -335,7 +349,10 @@ class PlotClip extends Component {
                 right_pct={this.state.right_inset_pct} 
                 bottom_pct={this.state.bottom_inset_pct}
                 left_pct={this.state.left_inset_pct}/>
-            <button id="save_file" type="button" style={{gridColumn: 1}} onClick={this.generateBoundaries}>Generate boundaries</button>
+            <label htmlFor="plots_save_filename" style={{gridColumn: 1}}>GeoJSON file name:</label>
+            <input id="plots_save_filename" placeholder={this.jsonFileName} size="100" style={{gridColumn: 2, minWidth: "100px", maxWidth: "200px"}} onChange={this.plotsSaveFilename}></input>
+            <button id="download_file" type="button" style={{gridColumn: 1, maxWidth: "15em"}} onClick={this.downloadBoundaries}>Download boundaries</button>
+            <button id="save_file" type="button" style={{gridColumn: 2, maxWidth: "15em"}} onClick={this.saveBoundaries}>Save boundaries</button>
         </div>
       </div>
     );
@@ -487,15 +504,30 @@ class PlotClip extends Component {
     }
   }
 
-  generateBoundaries(ev) {
+  getSaveJSONFilename() {
+    const check_filename = this.jsonFileName.toLowerCase();
+    const save_filename = this.jsonFileName;
+    var save_ext = '';
+    const parts = check_filename.split('.');
+    const ext = parts[parts.length - 1];
+
+    if (ext !== 'json' && ext !== 'geojson') {
+      save_ext = '.geojson';
+    }
+    return save_filename + save_ext; 
+  }
+
+  downloadBoundaries(ev) {
     const formData = new FormData();
     const points = this.state.points_x.map((coord_x, idx) => {return [coord_x, this.state.points_y[idx] ]});
+    const save_filename = this.getSaveJSONFilename();
 
     formData.append('point_scale', this.plots_display_info.img_display_scale * this.props.image_details.scale);
     formData.append('rows', this.state.plot_rows);
     formData.append('cols', this.state.plot_cols);
     formData.append('inset_pct', this.state.top_inset_pct + ',' + this.state.right_inset_pct + ',' + this.state.bottom_inset_pct + ',' + this.state.left_inset_pct);
     formData.append('points', JSON.stringify(points));
+    formData.append('save_filename', '');
 
     fetch(EXPORT_URI + '/' + this.props.image_details.name, {
       method: 'POST',
@@ -512,7 +544,7 @@ class PlotClip extends Component {
       link.href = url;
       link.setAttribute(
         'download',
-        `plots.geojson`,
+        save_filename,
       );
       // Append to html link element page
       document.body.appendChild(link);
@@ -521,6 +553,28 @@ class PlotClip extends Component {
       // Clean up and remove the link
       link.parentNode.removeChild(link);
     })
+    .catch(error => {console.log('ERROR'); console.log(error);});
+
+  }
+
+  saveBoundaries(ev) {
+    const formData = new FormData();
+    const points = this.state.points_x.map((coord_x, idx) => {return [coord_x, this.state.points_y[idx] ]});
+    const save_filename = this.getSaveJSONFilename();
+
+    formData.append('point_scale', this.plots_display_info.img_display_scale * this.props.image_details.scale);
+    formData.append('rows', this.state.plot_rows);
+    formData.append('cols', this.state.plot_cols);
+    formData.append('inset_pct', this.state.top_inset_pct + ',' + this.state.right_inset_pct + ',' + this.state.bottom_inset_pct + ',' + this.state.left_inset_pct);
+    formData.append('points', JSON.stringify(points));
+    formData.append('save_filename', save_filename);
+
+    fetch(EXPORT_URI + '/' + this.props.image_details.name, {
+      method: 'POST',
+      body: formData,
+      }
+    )
+    .then(response => {console.log(response);})
     .catch(error => {console.log('ERROR'); console.log(error);});
 
   }

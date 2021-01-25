@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './ImageLoad.css'
 
 var MAX_FILE_SIZE=100*1024*1024
-var FILE_UPLOAD_URI='http://127.0.0.1:5000/files'
+var FILE_UPLOAD_URI=window.location.origin.concat('/files')
 
 class ImageLoad extends Component {
   constructor(props) {
