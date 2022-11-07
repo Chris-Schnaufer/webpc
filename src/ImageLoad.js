@@ -21,6 +21,7 @@ class ImageLoad extends Component {
     btn.style.display = "none";
     browse.style.display = "default";
     browse.click();
+    setTimeout(() => {btn.style.display = "revert";}, 500);
   }
 
   handleDrop(ev) {
@@ -50,7 +51,7 @@ class ImageLoad extends Component {
     let btn = document.getElementById('imagedrop-file-browse');
     let browse = document.getElementById('imagedrop-file-find');
     const selected_file = browse.files;
-    btn.style.display = "unset";
+    btn.style.display = "revert";
     browse.style.display = "none";
     for (let i = 0; i < selected_file.length; i++) {
       this.handleUpload(selected_file[i]);

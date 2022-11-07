@@ -352,7 +352,7 @@ class PlotClip extends Component {
             <label htmlFor="plots_save_filename" style={{gridColumn: 1}}>GeoJSON file name:</label>
             <input id="plots_save_filename" placeholder={this.jsonFileName} size="100" style={{gridColumn: 2, minWidth: "100px", maxWidth: "200px"}} onChange={this.plotsSaveFilename}></input>
             <button id="download_file" type="button" style={{gridColumn: 1, maxWidth: "15em"}} onClick={this.downloadBoundaries}>Download boundaries</button>
-            <button id="save_file" type="button" style={{gridColumn: 2, maxWidth: "15em"}} onClick={this.saveBoundaries}>Save boundaries</button>
+            <button id="save_file" type="button" style={{gridColumn: 2, maxWidth: "15em"}} onClick={this.saveBoundaries}>Save on server</button>
         </div>
       </div>
     );
