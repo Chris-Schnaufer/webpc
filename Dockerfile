@@ -2,9 +2,10 @@ FROM node:current-alpine as build
 WORKDIR /app/react_frontend
 COPY ./package.json ./
 COPY ./package-lock.json ./
+RUN npm config set legacy-peer-deps true
 RUN npm ci
 COPY ./ ./
-RUN npm run build
+RUN NODE_OPTIONS=--openssl-legacy-provider npm run build
 
 FROM python:3.9-slim-buster
 WORKDIR /app/flask_backend

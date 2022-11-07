@@ -5,6 +5,9 @@ import './ImageBar.css';
 
 var FILE_LIST_URI=window.location.origin.concat('/files');
 
+const LARGE_IMAGE_SIZE_PX=150;
+const SMALL_IMAGE_SIZE_PX=47;
+
 class ImageBar extends Component {
   constructor(props) {
     super(props);
@@ -67,19 +70,36 @@ class ImageBar extends Component {
     const image_wrap_class = this.props.full_bar ? "imagebar-image-wrap" : "imagebar-image-wrap-small";
     const image_class = this.props.full_bar ? "imagebar-image" : "imagebar-image-small";
     const image_label_class = this.props.full_bar ? "imagebar-image-label" : "imagebar-image-label-small";
+    const image_size_px = this.props.full_bar ? LARGE_IMAGE_SIZE_PX : SMALL_IMAGE_SIZE_PX;
     return (
-      images.map((image) => 
-          <div key={image.id.toString()} id={"imagebar-image-wrap" + image.id.toString()} className={image_wrap_class} onClick={() => this.image_selected(image.uri, image)}>
-            <img id={"imagebar-image-"  + image.id.toString()} 
-                 className={image_class}
-                 src={window.location.origin.concat(image.thumbnail_uri)}
-                 alt={image.name}
-                 title={image.name}
-                 />
-            <label id={"imagebar-image-"  + image.id.toString() + "-label"} className={image_label_class} >
-              {image.name}
-            </label>
-          </div>
+      images.map((image) => {
+          const dim_ratio = Number(image.width) / Number(image.height);
+          var thumb_width = 0;
+          var thumb_height = 0;
+          if (image.width <= image.height) {
+            thumb_width = (image_size_px * dim_ratio) + 'px';
+            thumb_height = image_size_px + 'px';
+          } else {
+            thumb_width = image_size_px + 'px';
+            thumb_height = (image_size_px * dim_ratio) + 'px';
+          }
+          return (
+          <>
+            <div key={image.id.toString()} id={"imagebar-image-wrap" + image.id.toString()} className={image_wrap_class} onClick={() => this.image_selected(image.uri, image)}>
+              <img id={"imagebar-image-"  + image.id.toString()} 
+                   className={image_class}
+                   style={{minWidth: thumb_width, minHeight: thumb_height, maxWidth: thumb_width, maxHeight: thumb_height}}
+                   src={window.location.origin.concat(image.thumbnail_uri)}
+                   alt={image.name}
+                   title={image.name}
+                   />
+              <label id={"imagebar-image-"  + image.id.toString() + "-label"} className={image_label_class} >
+                {image.name}
+              </label>
+            </div>
+          </>
+          );
+        }
       )
     );
   }

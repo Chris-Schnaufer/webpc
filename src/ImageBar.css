@@ -18,9 +18,9 @@
 .imagebar-image-wrap {
     flex: auto;
     min-width: 152px;
-    min-height: 152px;
+    min-height: 172px;
     max-width: 152px;
-    max-height: 152px;
+    max-height: 172px;
     margin: 3px 10px 3px 10px;
     border: 1px solid darkgray;
     border-radius: 7px;
@@ -32,9 +32,9 @@
 .imagebar-image-wrap-small {
     flex: auto;
     min-width: 49px;
-    min-height: 49px;
+    min-height: 69px;
     max-width: 49px;
-    max-height: 49px;
+    max-height: 69px;
     margin: 3px 10px 3px 10px;
     border: 1px solid darkgray;
     border-radius: 7px;
@@ -58,10 +58,12 @@
 }
 
 .imagebar-image-label {
+    margin-left: 3px;
     font-size: smaller;
     font-weight: normal;
     text-align: center;
     color: black;
+    white-space: nowrap;
 }
 
 .imagebar-image-label-small {
@@ -69,4 +71,5 @@
     font-weight: normal;
     text-align: center;
     color: black;
+    white-space: nowrap;
 }
