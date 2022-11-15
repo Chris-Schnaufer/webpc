@@ -58,17 +58,16 @@
 }
 
 .toolbar-tool-grid {
-    display: grid;
+    position: relative;
 }
 
 .toolbar-svg {
-    grid-column: 1;
-    grid-row: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
     z-index: 99999;
     pointer-events: none;
 }
 
 .toolbar-tooldetail-wrap {
-    grid-column: 1;
-    grid-row: 1;
 }

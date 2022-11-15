@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import ImageLoad from './ImageLoad';
-import ExpandCollapse from './ExpandCollapse';
 import './ImageBar.css';
 
 var FILE_LIST_URI=window.location.origin.concat('/files');
@@ -109,8 +108,9 @@ class ImageBar extends Component {
     return(
       <div id="imagebar-wrap" className={this.props.full_bar ? "imagebar-wrap" : "imagebar-wrap-small"} >
         <ImageLoad have_uploaded={this.props.update_images} small={!this.props.full_bar} />
-        <ExpandCollapse full_bar={this.props.full_bar} state_changed={this.props.expand_func} />
-        {this.thumbnails(images.slice(this.state.start_pos, this.state.start_pos + this.state.max_display))}
+        <div id="imagebar-all-img-wrap" class="imagebar-all-img-wrap" >
+          {this.thumbnails(images.slice(this.state.start_pos, this.state.start_pos + this.state.max_display))}
+        </div>
       </div>
     );
   }

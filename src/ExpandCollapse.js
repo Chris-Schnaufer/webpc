@@ -6,8 +6,15 @@ class ExpandCollapse extends Component {
     super(props);
     this.clicked = this.clicked.bind(this);
     this.state = {
-      expanded: props.full_bar
+      expanded: props.expanded
     };
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const update = prevProps.expanded != this.state.expanded;
+    if (update) {
+      this.setState({expanded: this.props.expanded});
+    }
   }
 
   clicked() {
@@ -26,8 +33,8 @@ class ExpandCollapse extends Component {
                baseProfile="full"
                width="30" height="30"
                xmlns="http://www.w3.org/2000/svg">
-            {!this.state.expanded && <polyline points="5 7 15 7 10 12 5 7" stroke="darkgrey" strokeWidth="1" fill="darkgrey" ></polyline>}
-            {this.state.expanded && <polyline points="7 5 7 15 12 10 7 5" stroke="darkgrey" strokeWidth="1" fill="darkgrey" ></polyline>}
+            {this.state.expanded && <polyline points="5 7 15 7 10 12 5 7" stroke="darkgrey" strokeWidth="1" fill="darkgrey" ></polyline>}
+            {!this.state.expanded && <polyline points="7 5 7 15 12 10 7 5" stroke="darkgrey" strokeWidth="1" fill="darkgrey" ></polyline>}
           </svg>
         </div>
       );

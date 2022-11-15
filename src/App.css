@@ -1,3 +1,22 @@
 .App {
   text-align: center;
 }
+
+.image_bar_drop_wrap {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.floating_image_bar {
+  padding-top: 10px;
+  background-color: #EFEFEF;
+  border: 1px solid grey;
+  border-radius: 5px;
+  position: absolute;
+  top: 75px;
+  left: 35px;
+  margin-right: 35px;
+  z-index: 9999;
+  box-shadow: 5px 5px 5px #3E3E3E;
+}

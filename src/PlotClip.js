@@ -336,8 +336,8 @@ class PlotClip extends Component {
     return (
       <div style={{disply:"flex", displayDirection:"column", justifyContent: "space-around"}} >
         <div id="plot_file_name_wrapper" style={{marginBottom: "10px"}} >
-          <span style={{gridColumn: 1}} >File name:</span>
-          <span id="file_name" style={{gridColumn: 2}} >{this.props.image_details.name}</span>
+          <span style={{gridColumn: 1}} >File name:&nbsp;</span>
+          <span id="file_name" style={{gridColumn: 2, fontWeight: "bold"}} >{this.props.image_details.name}</span>
         </div>
         <div style={{display:"grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "10px", maxWidth: "900px"}} >
             <label htmlFor="plot_cols" style={{gridColumn: 1}}>Number of plot columns:</label>

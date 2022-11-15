@@ -5,6 +5,7 @@
     justify-content: flex-start;
     height: 182px;
     margin-bottom: 10px;
+    height: 100%;
 }
 
 .imagebar-wrap-small {
@@ -13,6 +14,14 @@
     justify-content: flex-start;
     height: 70px;
     margin-bottom: 10px;
+    height: 100%;
+}
+
+.imagebar-all-img-wrap {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
 }
 
 .imagebar-image-wrap {
