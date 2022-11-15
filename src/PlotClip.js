@@ -783,8 +783,8 @@ class PlotClip extends Component {
              onMouseEnter={enter_func}
              onMouseUp={up_func} >
           <div id="plotclip-image-grid" className="plotclip-image-grid" >
-          {this.render_plots(this.state.current_tool)}
-        </div>
+            {this.render_plots(this.state.current_tool)}
+          </div>
         </div>
         <div id="plotclip-tool-actions" className="plotclip-tool-actions" >
           <Toolbar tools={this.tools[this.state.current_tool].tool_actions} tool_size="small" />
