@@ -106,13 +106,13 @@ class ImageLoad extends Component {
                   <polygon points="0 0 35 0 50 15 50 70 0 70 0 0" stroke="lightgrey" fill="white" strokeWidth="2" />
                   <polygon points="35 0 35 15 50 15" stroke="lightgrey" fill="white" strokeWidth="1" />
                   <polygon points="25 35 35 45 30 45 30 55 20 55 20 45 15 45 25 35" stroke="lightgrey" fill="white" strokeWidth="1" />
-                  <text x="25" y="27" fontSize="10" textAnchor="middle" fill="darkgrey">Drop File</text>
+                  <text x="25" y="27" fontSize="10" textAnchor="middle" fill="darkgrey">Drop Files</text>
                 </svg>
               </div>
             }
           </div>
           <div id="imagedrop-browse" className="imagedrop-browse">
-            <button type="button" id="imagedrop-file-browse" className={this.props.small ? "imagedrop-file-browse-small" : "imagedrop-file-browse"} onClick={this.browseImage}>Browse Image</button>
+            <button type="button" id="imagedrop-file-browse" className={this.props.small ? "imagedrop-file-browse-small" : "imagedrop-file-browse"} onClick={this.browseImage}>Browse Images</button>
             <input type="file" id="imagedrop-file-find" accept="image/*" multiple className="imagedrop-file-pick" onChange={this.fileBrowsed}></input>
           </div>
         </div>

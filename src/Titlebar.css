@@ -4,6 +4,8 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    background-color: whitesmoke;
+    border-bottom: 1px solid lightgrey;
 }
 
 .titlebar > h1 {

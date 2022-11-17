@@ -27,7 +27,6 @@
     max-width: 54px;
     max-height: 54px;
     margin: 1px 5px 1px 1px;
-    border: 1px solid darkgray;
     border-radius: 5px;
     background-clip: content-box;
 }
@@ -38,7 +37,6 @@
     max-width: 28px;
     max-height: 28px;
     margin: 1px 5px 1px 1px;
-    border: 1px solid darkgray;
     border-radius: 3px;
     background-clip: content-box;
 }

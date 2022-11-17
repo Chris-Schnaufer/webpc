@@ -67,7 +67,7 @@ class PlotClip extends Component {
   ];
 
   plots_actions = [
-  {id: 'toggle_magnifier', name: 'Toggles magnifier', description: "Toggle Magnifier", tool_uri: process.env.PUBLIC_URL + '/Magnifier.png', state: 0, tool_click: (ev)=>this.actionToggleMagnifier(ev)},
+  //{id: 'toggle_magnifier', name: 'Toggles magnifier', description: "Toggle Magnifier", tool_uri: process.env.PUBLIC_URL + '/Magnifier.png', state: 0, tool_click: (ev)=>this.actionToggleMagnifier(ev)},
   ];
 
   adjustment_actions = [];
@@ -117,13 +117,38 @@ class PlotClip extends Component {
   cursor_last_page_x =  0;
   cursor_last_page_y = 0;
 
-  componentDidMount(){
+  prev_mouse_x = 0;
+  prev_mouse_y = 0;
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.image_uri != prevProps.image_uri) {
+      this.setState({
+                  points_x: [],
+                  points_y: [],
+                  last_x: null,
+                  last_y: null,
+                  drawing: false,
+                  was_drawing: false,
+                  have_bounds: false,
+                  current_tool: 0,
+                  magnifier: true,
+                  plot_rows: 1,
+                  plot_cols: 1,
+                  top_inset_pct: 0.0,
+                  right_inset_pct: 0.0,
+                  bottom_inset_pct: 0.0,
+                  left_inset_pct: 0.0
+      });
+    }
+  }
+
+  componentDidMount() {
     document.addEventListener("keydown", this.keyPress, false);
 
     this.setState({offset_x:0});
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
     document.removeEventListener("keydown", this.keyPress, false);
   }
 
@@ -202,7 +227,7 @@ class PlotClip extends Component {
   mouseMove(ev) {
     this.cursor_last_page_x = ev.pageX;
     this.cursor_last_page_y = ev.pageY;
-    if (this.state.drawing) {
+    if (this.state.drawing && ev.target.id == "field_image") {
       let client_rect = ev.target.getBoundingClientRect();
       let cur_x = ev.clientX - client_rect.x;
       let cur_y = ev.clientY - client_rect.y;
@@ -336,8 +361,8 @@ class PlotClip extends Component {
     return (
       <div style={{disply:"flex", displayDirection:"column", justifyContent: "space-around"}} >
         <div id="plot_file_name_wrapper" style={{marginBottom: "10px"}} >
-          <span style={{gridColumn: 1}} >File name:&nbsp;</span>
-          <span id="file_name" style={{gridColumn: 2, fontWeight: "bold"}} >{this.props.image_details.name}</span>
+          <span id="file_name" style={{gridColumn: 1, fontWeight: "bold"}} >{this.props.image_details.name}</span>
+          <span style={{gridColumn: 2}} >&nbsp;</span>
         </div>
         <div style={{display:"grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "10px", maxWidth: "900px"}} >
             <label htmlFor="plot_cols" style={{gridColumn: 1}}>Number of plot columns:</label>
@@ -390,8 +415,19 @@ class PlotClip extends Component {
       last_x = points_x[points_x.length - 1];
       last_y = points_y[points_y.length - 1];
     }
+
+    const last_diff_x = Math.abs(this.state.last_x - this.prev_mouse_x);
+    const last_diff_y = Math.abs(this.state.last_y - this.prev_mouse_y);
+    const valid_move = (last_diff_x < 70) || (last_diff_y < 70);
     if (this.state.drawing && this.state.last_x && this.state.last_y && (this.state.last_x !== last_x || this.state.last_y !== last_y)) {
-      polyline += (this.state.last_x + this.plots_display_info.offset_x) + ' ' + (this.state.last_y + this.plots_display_info.offset_y);
+      if (valid_move) {
+        polyline += (this.state.last_x + this.plots_display_info.offset_x) + ' ' + (this.state.last_y + this.plots_display_info.offset_y);
+      }
+    }
+
+    if ((this.state.last_x != null) && (this.state.last_y != null)) {
+      this.prev_mouse_x = this.state.last_x;
+      this.prev_mouse_y = this.state.last_y;
     }
     return polyline;
   }

@@ -54,7 +54,7 @@ class Toolbar extends Component {
                  baseProfile="full"
                  width="100%" height="100%"
                  xmlns="http://www.w3.org/2000/svg">
-            <polygon points="0 0 60 0 60 95 0 95 0 0" stroke="white" strokeWidth="1" fill="white" fillOpacity="60%" />
+            <polygon points="0 0 60 0 60 95 0 95 0 0" stroke="whitesmoke" strokeWidth="1" fill="whitesmoke" fillOpacity="60%" />
           </svg>
           <div id="toolbar-tooldetail-wrap" className="toolbar-tooldetail-wrap" >
             <img id={"toolbar-tool-"  + tool_info.id.toString()} 

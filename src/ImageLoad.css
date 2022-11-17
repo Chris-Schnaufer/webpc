@@ -12,6 +12,7 @@
     border-radius: 10px;
     width: 152px;
     height: 152px;
+    background-color: whitesmoke;
 }
 
 .imagedrop-border-small {
@@ -19,6 +20,7 @@
     border-radius: 10px;
     width: 152px;
     height: 57px;
+    background-color: whitesmoke;
 }
 
 .imagedrop-zone {
@@ -40,7 +42,7 @@
 }
 
 .imagedrop-zone-info {
-    margin: 15px 0px 0px 40px;
+    margin-top: 15px;
     border: 0px;
 }
 
@@ -52,12 +54,12 @@
 }
 
 .imagedrop-file-browse {
-    margin: 10px 0px 0px 30px;
+    margin-top: 10px;
     white-space: nowrap;
 }
 
 .imagedrop-file-browse-small
 {
-    margin: 10px 0px 0px 30px;
+    margin-top: 10px;
     white-space: nowrap;
 }

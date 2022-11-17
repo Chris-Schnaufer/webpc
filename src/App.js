@@ -71,7 +71,7 @@ class App extends Component {
   render() {
     const should_reload_images = this.state.reload_images;
     return (
-      <div id="App">
+      <div id="App" class="app">
         <Titlebar title="Plot Boundaries" />
           {this.state.selected_image == null ?
               <ImageBar reload={should_reload_images} 
