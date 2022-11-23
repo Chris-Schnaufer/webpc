@@ -317,7 +317,10 @@ def thumbnail(name: str = None):
 
     # Check for a thumnail and create one if it doesn't exist
     if not os.path.exists(FILE_THUMBNAIL_PATH):
-        os.makedirs(FILE_THUMBNAIL_PATH)
+        try:
+            os.makedirs(FILE_THUMBNAIL_PATH)
+        except FileExistsError:
+            pass
 
     file_id = re.sub("[^0-9a-zA-Z]+", "", str(os.path.basename(image_path)))
     thumbnail_path = os.path.join(FILE_THUMBNAIL_PATH, file_id + '.png')

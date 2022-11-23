@@ -3,7 +3,12 @@ import Titlebar from './Titlebar';
 import ImageBar from './ImageBar';
 import PlotClip from './PlotClip';
 import ExpandCollapse from './ExpandCollapse';
+import Messages from './Messages';
 import "./App.css"
+
+Messages.add(Messages.ERROR, "Error", "Extended information");
+Messages.add(Messages.WARN, "Warn", "Extended information warning");
+Messages.add(Messages.INFO, "INFO", "Extended INFORMATION");
 
 class App extends Component {
 
@@ -73,7 +78,7 @@ class App extends Component {
     return (
       <div id="App" class="app">
         <Titlebar title="Plot Boundaries" />
-          {this.state.selected_image == null ?
+        {this.state.selected_image == null ?
               <ImageBar reload={should_reload_images} 
                     done_reload={this.image_reload_done}
                     selected_func={this.image_selected}
@@ -81,10 +86,12 @@ class App extends Component {
                     full_bar={true}
                     expand_func={this.expand_image_bar}
               /> :
-              this.render_image_bar()}
+              this.render_image_bar()
+        }
         {this.state.selected_image != null ? 
               <PlotClip image_uri={window.location.origin.concat(this.state.selected_image)} image_details={this.state.image_details} /> :
               null}
+        <Messages />
       </div>
     );
   }

@@ -46,7 +46,7 @@ class ImageBar extends Component {
     )
     .then(response => response.json())
     .then(success => {this.setState({image_list: success});this.props.done_reload();})
-    .catch(error => {console.log('ERROR'); console.log(error);});
+    .catch(error => {console.log('ERROR', error);});
   }
 
   handleResize() {

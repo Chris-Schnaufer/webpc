@@ -1,0 +1,48 @@
+
+.messages_wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.msg_wrap_base {
+    display: flex;
+    flex-direction: row;
+    border: 1px solid grey;
+    border-radius: 7px;
+    background-color: lightgrey;
+    width: 600px;
+    opacity: 0.90;
+}
+
+.message_wrap_err {
+    background-color: coral;
+    border-color: red;
+}
+
+.message_wrap_warn {
+    background-color: lightsteelblue;
+    border-color: steelblue;
+}
+
+.message_wrap_info {
+    background-color: lightgreen;
+    border-color: green;
+}
+
+.message_close {
+    font-family: sans-serif;
+    font-size: x-small;
+    font-weight: bold;
+    padding-left: 10px;
+}
+
+.message_close::after {
+    content: "x";
+}
+
+.message_text {
+    padding: .5em 1em .5em 1em;
+}
